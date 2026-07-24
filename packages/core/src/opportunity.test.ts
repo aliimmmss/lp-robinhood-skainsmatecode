@@ -76,4 +76,18 @@ describe('rankOpportunities', () => {
     expect(ranked.map((entry) => entry.name)).toEqual(['A 1%', 'B 0.05%'])
     expect(ranked.some((entry) => entry.name === 'DUST 1%')).toBe(false)
   })
+
+  it('ranks screen-passing pools above higher-yield pools that fail the screen', () => {
+    const ranked = rankOpportunities(
+      [
+        // fails the screen (market cap too low) but has a far higher headline yield
+        pool({ name: 'SPIKE 1%', marketCapUsd: 100_000, volume24hUsd: 25_000_000, reserveUsd: 200_000 }),
+        // passes the screen with a modest yield
+        pool({ name: 'SOLID 0.05%', feeTierPercent: 0.05, volume24hUsd: 12_000_000, reserveUsd: 450_000 }),
+      ],
+      now,
+    )
+    expect(ranked.map((entry) => entry.name)).toEqual(['SOLID 0.05%', 'SPIKE 1%'])
+    expect(ranked[0]!.passesScreen).toBe(true)
+  })
 })

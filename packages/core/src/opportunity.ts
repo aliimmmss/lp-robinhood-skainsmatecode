@@ -97,9 +97,17 @@ export function scoreOpportunity(pool: OpportunityPool, now = new Date()): Score
   }
 }
 
+/**
+ * Screen-passing pools rank above failing ones, then by estimated daily fee
+ * return within each group. Ranking purely by yield buries every depositable
+ * pool beneath short-lived volume spikes in tiny-market-cap tokens.
+ */
 export function rankOpportunities(pools: readonly OpportunityPool[], now = new Date()): readonly ScoredOpportunity[] {
   return pools
     .filter((pool) => pool.volume24hUsd >= DUST_MIN_VOLUME_24H_USD && pool.reserveUsd >= DUST_MIN_RESERVE_USD)
     .map((pool) => scoreOpportunity(pool, now))
-    .sort((left, right) => Number(right.estDailyFeeReturnPercent) - Number(left.estDailyFeeReturnPercent))
+    .sort((left, right) => {
+      if (left.passesScreen !== right.passesScreen) return left.passesScreen ? -1 : 1
+      return Number(right.estDailyFeeReturnPercent) - Number(left.estDailyFeeReturnPercent)
+    })
 }

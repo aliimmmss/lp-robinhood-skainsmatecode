@@ -150,8 +150,13 @@ export async function fetchAndRankOpportunities(pages = 3): Promise<Opportunity[
     }
   }
   const now = new Date()
+  // Screen-passing pools first, then by yield within each group — ranking purely
+  // by yield buries every depositable pool under short-lived volume spikes.
   return pools
     .filter((pool) => pool.volume24hUsd >= DUST_MIN_VOLUME && pool.reserveUsd >= DUST_MIN_RESERVE)
     .map((pool) => score(pool, now))
-    .sort((left, right) => Number(right.estDailyFeeReturnPercent) - Number(left.estDailyFeeReturnPercent))
+    .sort((left, right) => {
+      if (left.passesScreen !== right.passesScreen) return left.passesScreen ? -1 : 1
+      return Number(right.estDailyFeeReturnPercent) - Number(left.estDailyFeeReturnPercent)
+    })
 }
