@@ -31,6 +31,19 @@ export type Opportunity = {
   quoteSymbol: string
   basePriceUsd: number | null
   quotePriceUsd: number | null
+  priceTrend: PriceTrend
+  priceChange24hPercent: number
+}
+
+export type PriceTrend = 'trending-up' | 'trending-down' | 'ranging'
+const TREND_MAGNITUDE_PERCENT = 5
+
+/** Mirrors classifyPriceTrend in packages/core/src/pool-outcome.ts. */
+function classifyTrend(h6: number, h24: number): PriceTrend {
+  if (Math.abs(h24) < TREND_MAGNITUDE_PERCENT) return 'ranging'
+  if (h24 > 0 && h6 > 0) return 'trending-up'
+  if (h24 < 0 && h6 < 0) return 'trending-down'
+  return 'ranging'
 }
 
 type RawPool = {
@@ -46,6 +59,8 @@ type RawPool = {
   quoteSymbol: string
   basePriceUsd: number | null
   quotePriceUsd: number | null
+  change6h: number
+  change24h: number
 }
 
 /** Splits a GeckoTerminal "BASE / QUOTE 1%" name into token symbols. */
@@ -94,6 +109,8 @@ function normalize(attributes: Record<string, unknown>): RawPool | null {
     quoteSymbol,
     basePriceUsd: toNumber(attributes.base_token_price_usd),
     quotePriceUsd: toNumber(attributes.quote_token_price_usd),
+    change6h: toNumber((attributes.price_change_percentage as { h6?: unknown } | undefined)?.h6) ?? 0,
+    change24h: toNumber((attributes.price_change_percentage as { h24?: unknown } | undefined)?.h24) ?? 0,
   }
 }
 
@@ -128,6 +145,8 @@ function score(pool: RawPool, now: Date): Opportunity {
     quoteSymbol: pool.quoteSymbol,
     basePriceUsd: pool.basePriceUsd,
     quotePriceUsd: pool.quotePriceUsd,
+    priceTrend: classifyTrend(pool.change6h, pool.change24h),
+    priceChange24hPercent: pool.change24h,
   }
 }
 

@@ -78,6 +78,15 @@ export type {
   RangeIlInput,
   YieldStability,
 } from './pool-risk.js'
+export { bestTierPerPair, classifyPriceTrend, normalizePairKey, projectPositionOutcome } from './pool-outcome.js'
+export type {
+  BestTier,
+  PositionOutcome,
+  PositionOutcomeInput,
+  PriceChangeWindows,
+  PriceTrend,
+  TierCandidate,
+} from './pool-outcome.js'
 export { buildDepositPlan } from './deposit-plan.js'
 export type { DepositPlan, DepositPlanInput } from './deposit-plan.js'
 export { OPPORTUNITY_CRITERIA, rankOpportunities, scoreOpportunity } from './opportunity.js'

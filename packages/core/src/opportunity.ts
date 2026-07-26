@@ -34,6 +34,9 @@ export type OpportunityPool = {
   feeTierPercent: number
   /** 24h trade counts, when the source provides them (used for organic-volume checks). */
   transactions24h?: { buys: number; sells: number; buyers: number; sellers: number }
+  /** Per-token USD prices, when available (used to cross-check our own on-chain price). */
+  basePriceUsd?: number | null
+  quotePriceUsd?: number | null
   createdAt: Date
   marketCapUsd: number | null
   reserveUsd: number
@@ -57,6 +60,8 @@ export type ScoredOpportunity = {
   passesScreen: boolean
   screenNotes: readonly string[]
   transactions24h?: { buys: number; sells: number; buyers: number; sellers: number }
+  basePriceUsd?: number | null
+  quotePriceUsd?: number | null
 }
 
 export function scoreOpportunity(pool: OpportunityPool, now = new Date()): ScoredOpportunity {
@@ -98,6 +103,8 @@ export function scoreOpportunity(pool: OpportunityPool, now = new Date()): Score
     passesScreen: screenNotes.length === 0,
     screenNotes,
     ...(pool.transactions24h ? { transactions24h: pool.transactions24h } : {}),
+    ...(pool.basePriceUsd != null ? { basePriceUsd: pool.basePriceUsd } : {}),
+    ...(pool.quotePriceUsd != null ? { quotePriceUsd: pool.quotePriceUsd } : {}),
   }
 }
 

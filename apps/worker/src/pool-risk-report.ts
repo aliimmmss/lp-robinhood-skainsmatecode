@@ -1,8 +1,10 @@
 import {
   assessOrganicVolume,
+  bestTierPerPair,
   computeInRangeHistory,
   computeYieldStability,
   estimateRangeImpermanentLoss,
+  type BestTier,
   type DailyCandle,
   type InRangeHistory,
   type OrganicVolumeAssessment,
@@ -30,6 +32,8 @@ export type PoolRisk = {
   address: string
   name: string
   historyDays: number
+  /** Daily closes, oldest first — enough for a sparkline without shipping full candles. */
+  closes: readonly number[]
   /** Divergence loss over the observed window for a +/-rangePercent band, as a percent string. */
   impermanentLossPercent: string | null
   /** Fee return over the window minus that divergence loss. */
@@ -47,6 +51,8 @@ export type PoolRiskReport = {
   generatedAt: string
   rangePercent: number
   pools: readonly PoolRisk[]
+  /** Best net-earning fee tier per pair; the highest fee tier is not always best. */
+  bestTiers: readonly BestTier[]
   disclaimer: string
 }
 
@@ -62,7 +68,12 @@ export function analyzePoolRisk(
   rangePercent = DEFAULT_RANGE_PERCENT,
 ): PoolRisk {
   const warnings: string[] = []
-  const base = { address: pool.address, name: pool.name, historyDays: candles.length }
+  const base = {
+    address: pool.address,
+    name: pool.name,
+    historyDays: candles.length,
+    closes: candles.map((candle) => candle.close),
+  }
 
   if (candles.length < 2) {
     return {
@@ -164,6 +175,7 @@ export async function buildPoolRiskReport(
         address: pool.address,
         name: pool.name,
         historyDays: 0,
+        closes: [],
         impermanentLossPercent: null,
         netReturnPercent: null,
         grossFeeReturnPercent: null,
@@ -181,6 +193,7 @@ export async function buildPoolRiskReport(
     generatedAt: now.toISOString(),
     rangePercent,
     pools: analyzed,
+    bestTiers: bestTierPerPair(analyzed),
     disclaimer:
       'Divergence loss, in-range history, and yield stability are estimates from third-party daily candles over a short window, using current TVL for every day. They describe the past and are not a forecast or a recommendation to deploy capital.',
   }

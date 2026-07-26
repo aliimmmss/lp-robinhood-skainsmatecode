@@ -49,6 +49,14 @@ export type SiteData = {
   depositPlan: DepositPlan | null
   opportunities: OpportunityReport | { error: string } | null
   risk: PoolRiskReport | { error: string } | null
+  /** Our own on-chain price for the plan's pool against the third-party feed. */
+  priceCrossCheck: {
+    poolAddress: string
+    onChainPrice: string
+    thirdPartyPrice: string
+    differencePercent: string
+    agrees: boolean
+  } | null
 }
 
 /** DB-only snapshot (offline-safe). Opportunities are attached separately. */
@@ -73,6 +81,40 @@ export function buildSiteData(environment: NodeJS.ProcessEnv = process.env, now 
     depositPlan,
     opportunities: null,
     risk: null,
+    priceCrossCheck: null,
+  }
+}
+
+/** Agreement threshold; wider than normal feed lag, narrow enough to catch a real break. */
+const PRICE_AGREEMENT_TOLERANCE_PERCENT = 2
+
+function buildPriceCrossCheck(
+  plan: DepositPlan | null,
+  opportunities: OpportunityReport,
+): SiteData['priceCrossCheck'] {
+  if (!plan) return null
+  const match = opportunities.opportunities.find(
+    (pool) => pool.address.toLowerCase() === plan.poolAddress.toLowerCase(),
+  )
+  if (!match) return null
+  // The scanner reports USD prices per token; the plan's price is token1 per token0.
+  const thirdParty =
+    match.basePriceUsd && match.quotePriceUsd && match.quotePriceUsd > 0
+      ? match.basePriceUsd / match.quotePriceUsd
+      : null
+  if (thirdParty === null) return null
+  const onChain = Number(plan.currentPriceToken1PerToken0)
+  if (!Number.isFinite(onChain) || onChain <= 0) return null
+  // Either orientation may be the readable one; compare against the closer.
+  const inverted = 1 / thirdParty
+  const candidate = Math.abs(onChain - thirdParty) <= Math.abs(onChain - inverted) ? thirdParty : inverted
+  const differencePercent = ((onChain - candidate) / candidate) * 100
+  return {
+    poolAddress: plan.poolAddress,
+    onChainPrice: onChain.toFixed(2),
+    thirdPartyPrice: candidate.toFixed(2),
+    differencePercent: differencePercent.toFixed(2),
+    agrees: Math.abs(differencePercent) <= PRICE_AGREEMENT_TOLERANCE_PERCENT,
   }
 }
 
@@ -85,6 +127,7 @@ export async function assembleSiteData(
   try {
     const opportunities = await buildOpportunityReport({ now })
     data.opportunities = opportunities
+    data.priceCrossCheck = buildPriceCrossCheck(data.depositPlan, opportunities)
     // Risk analysis costs one OHLCV call per pool, so it runs here at deploy
     // time rather than in the browser's frequent refresh.
     try {

@@ -52,6 +52,7 @@ type PoolRisk = {
   address: string
   name: string
   historyDays: number
+  closes: number[]
   impermanentLossPercent: string | null
   netReturnPercent: string | null
   grossFeeReturnPercent: string | null
@@ -60,8 +61,37 @@ type PoolRisk = {
   organic: { suspicious: boolean; uniqueTraders: number } | null
   warnings: string[]
 }
+type BestTier = { pair: string; bestName: string; bestAddress: string; bestNetPercent: string; alternatives: number }
 const riskReport =
-  data.risk && 'pools' in data.risk ? (data.risk as { rangePercent: number; pools: PoolRisk[] }) : null
+  data.risk && 'pools' in data.risk
+    ? (data.risk as { rangePercent: number; pools: PoolRisk[]; bestTiers?: BestTier[] })
+    : null
+const bestTiers = (riskReport?.bestTiers ?? []).filter((tier) => tier.alternatives > 0)
+const priceCrossCheck = (data.priceCrossCheck ?? null) as {
+  onChainPrice: string
+  thirdPartyPrice: string
+  differencePercent: string
+  agrees: boolean
+} | null
+
+/** Inline sparkline points for a series, normalized into a 100x24 viewBox. */
+function sparklinePoints(values: readonly number[]): string | null {
+  if (values.length < 2) return null
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const span = max - min || 1
+  return values
+    .map((value, index) => {
+      const x = (index / (values.length - 1)) * 100
+      const y = 24 - ((value - min) / span) * 24
+      return `${x.toFixed(1)},${y.toFixed(1)}`
+    })
+    .join(' ')
+}
+/** Median daily fee rate, used to drive the dollar projection client-side. */
+function medianDailyPercent(pool: PoolRisk): number {
+  return pool.stability ? Number(pool.stability.medianDailyReturnPercent) : 0
+}
 // Best net first; pools without data sink to the bottom.
 const riskPools = riskReport
   ? [...riskReport.pools].sort((left, right) => {
@@ -344,7 +374,8 @@ const favicon =
                 <th class="px-3 py-2 text-right font-medium">Vol/TVL</th>
                 <th class="px-3 py-2 text-right font-medium">24h vol</th>
                 <th class="px-3 py-2 text-right font-medium">TVL</th>
-                <th class="px-3 py-2 text-right font-medium">Trend</th>
+                <th class="px-3 py-2 text-right font-medium">Vol trend</th>
+                <th class="px-3 py-2 text-right font-medium">Price</th>
                 <th class="px-3 py-2 text-right font-medium">&nbsp;</th>
               </tr>
             </thead>
@@ -376,7 +407,8 @@ const favicon =
                     <th class="px-3 py-2 text-right font-medium">Vol/TVL</th>
                     <th class="px-3 py-2 text-right font-medium">24h vol</th>
                     <th class="px-3 py-2 text-right font-medium">TVL</th>
-                    <th class="px-3 py-2 text-right font-medium">Trend</th>
+                    <th class="px-3 py-2 text-right font-medium">Vol trend</th>
+                    <th class="px-3 py-2 text-right font-medium">Price</th>
                     <th class="px-3 py-2 text-right font-medium">Screen</th>
                     <th class="px-3 py-2 text-right font-medium">&nbsp;</th>
                   </tr>
@@ -411,6 +443,7 @@ const favicon =
                       <td class={`px-3 py-2 text-right text-xs ${trendColor[entry.volumeTrend]}`}>
                         {entry.volumeTrend}
                       </td>
+                      <td class="px-3 py-2 text-right text-xs text-neutral-500">—</td>
                       <td class="px-3 py-2 text-right text-xs">
                         {entry.passesScreen ? (
                           <span class="text-emerald-400">pass</span>
@@ -453,6 +486,19 @@ const favicon =
           by the share of days that closed inside the band. Recomputed each deploy from third-party daily
           candles, using current TVL for every day. Estimates of the past, not a forecast.
         </p>
+        <label class="mb-4 flex items-center gap-2 text-xs text-neutral-500">
+          Position size
+          <span class="text-neutral-400">$</span>
+          <input
+            id="notional-input"
+            type="number"
+            min="1"
+            step="100"
+            value="1000"
+            class="w-28 rounded border border-neutral-800 bg-neutral-950 px-2 py-1 font-mono tabular-nums text-neutral-200"
+          />
+          <span>drives the dollar columns; nothing is sent anywhere</span>
+        </label>
         {
           riskPools.length > 0 ? (
             <div class="overflow-x-auto rounded-lg border border-neutral-800">
@@ -461,26 +507,52 @@ const favicon =
                   <tr class="text-left text-xs uppercase tracking-wide text-neutral-500">
                     <th class="px-3 py-2 font-medium">Pool</th>
                     <th class="px-3 py-2 text-right font-medium">Net</th>
-                    <th class="px-3 py-2 text-right font-medium">Gross fees</th>
+                    <th class="px-3 py-2 text-right font-medium">Net $</th>
+                    <th class="px-3 py-2 text-right font-medium">Fees/day $</th>
                     <th class="px-3 py-2 text-right font-medium">Div. loss</th>
+                    <th class="px-3 py-2 text-right font-medium">Breakeven</th>
                     <th class="px-3 py-2 text-right font-medium">In range</th>
                     <th class="px-3 py-2 text-right font-medium">Quality</th>
                   </tr>
                 </thead>
                 <tbody>
                   {riskPools.map((pool) => (
-                    <tr class="border-t border-neutral-900">
+                    <tr
+                      class="border-t border-neutral-900"
+                      data-net-percent={pool.netReturnPercent ?? ''}
+                      data-daily-percent={medianDailyPercent(pool)}
+                      data-il-percent={pool.impermanentLossPercent ?? ''}
+                    >
                       <td class="px-3 py-2">
                         <div class="max-w-[11rem] truncate text-neutral-200">{pool.name}</div>
-                        <a
-                          href={geckoPoolUrl(pool.address)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title={pool.address}
-                          class="font-mono text-xs text-neutral-500 hover:text-neutral-300"
-                        >
-                          {truncateAddress(pool.address)}
-                        </a>
+                        <div class="flex items-center gap-2">
+                          <a
+                            href={geckoPoolUrl(pool.address)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={pool.address}
+                            class="font-mono text-xs text-neutral-500 hover:text-neutral-300"
+                          >
+                            {truncateAddress(pool.address)}
+                          </a>
+                          {sparklinePoints(pool.closes) && (
+                            <svg
+                              viewBox="0 0 100 24"
+                              preserveAspectRatio="none"
+                              class="h-4 w-16 shrink-0"
+                              aria-label={`${pool.historyDays}-day price path`}
+                            >
+                              <polyline
+                                points={sparklinePoints(pool.closes)!}
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                                class="text-neutral-600"
+                                vector-effect="non-scaling-stroke"
+                              />
+                            </svg>
+                          )}
+                        </div>
                       </td>
                       <td
                         class={`px-3 py-2 text-right font-mono tabular-nums ${
@@ -493,11 +565,26 @@ const favicon =
                       >
                         {pool.netReturnPercent === null ? '—' : `${pool.netReturnPercent}%`}
                       </td>
-                      <td class="px-3 py-2 text-right font-mono tabular-nums text-neutral-400">
-                        {pool.grossFeeReturnPercent === null ? '—' : `${pool.grossFeeReturnPercent}%`}
+                      <td
+                        data-cell="net-usd"
+                        class="px-3 py-2 text-right font-mono tabular-nums text-neutral-300"
+                      >
+                        —
+                      </td>
+                      <td
+                        data-cell="fees-usd"
+                        class="px-3 py-2 text-right font-mono tabular-nums text-neutral-400"
+                      >
+                        —
                       </td>
                       <td class="px-3 py-2 text-right font-mono tabular-nums text-amber-400">
                         {pool.impermanentLossPercent === null ? '—' : `${pool.impermanentLossPercent}%`}
+                      </td>
+                      <td
+                        data-cell="breakeven"
+                        class="px-3 py-2 text-right font-mono tabular-nums text-neutral-400"
+                      >
+                        —
                       </td>
                       <td class="px-3 py-2 text-right font-mono tabular-nums text-neutral-400">
                         {pool.inRange === null
@@ -527,6 +614,46 @@ const favicon =
                 It is recomputed on the next deploy from daily candle history.
               </p>
             </div>
+          )
+        }
+
+        {
+          bestTiers.length > 0 && (
+            <div class="mt-4 rounded-lg border border-neutral-800 p-4">
+              <h3 class="mb-2 text-xs font-medium text-neutral-300">Best fee tier per pair</h3>
+              <p class="mb-2 text-pretty text-xs text-neutral-500">
+                The same pair exists at several fee tiers, and the highest fee does not always earn the most
+                net.
+              </p>
+              <ul class="space-y-1 text-xs">
+                {bestTiers.map((tier) => (
+                  <li class="text-neutral-400">
+                    <span class="text-neutral-200">{tier.bestName}</span>
+                    <span class="font-mono tabular-nums text-emerald-400"> {tier.bestNetPercent}%</span>
+                    <span class="text-neutral-500">
+                      {' '}
+                      beats {tier.alternatives} other tier{tier.alternatives === 1 ? '' : 's'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        {
+          priceCrossCheck && (
+            <p class="mt-3 text-pretty text-xs text-neutral-500">
+              Price cross-check: our on-chain read{' '}
+              <span class="font-mono tabular-nums text-neutral-300">{priceCrossCheck.onChainPrice}</span> vs
+              third-party{' '}
+              <span class="font-mono tabular-nums text-neutral-300">{priceCrossCheck.thirdPartyPrice}</span> —
+              <span class={priceCrossCheck.agrees ? ' text-emerald-400' : ' text-amber-400'}>
+                {' '}
+                {priceCrossCheck.differencePercent}% apart
+                {priceCrossCheck.agrees ? ' (agree)' : ' (check before acting)'}
+              </span>
+            </p>
           )
         }
       </section>
@@ -606,6 +733,17 @@ const favicon =
         steady: 'text-neutral-400',
         fading: 'text-amber-400',
       }
+      // A trending price leaves its range and turns divergence loss into a realized one.
+      const priceTrendClass: Record<string, string> = {
+        'trending-up': 'text-amber-400',
+        'trending-down': 'text-amber-400',
+        ranging: 'text-neutral-400',
+      }
+      const priceTrendLabel: Record<string, string> = {
+        'trending-up': 'trend up',
+        'trending-down': 'trend down',
+        ranging: 'ranging',
+      }
 
       function getWatchlist(): string[] {
         try {
@@ -642,7 +780,8 @@ const favicon =
           `<td class="${NUM} text-neutral-400">${o.volumeToTvl.toFixed(1)}</td>` +
           `<td class="${NUM} text-neutral-400">${usd(o.volume24hUsd)}</td>` +
           `<td class="${NUM} text-neutral-400">${usd(o.reserveUsd)}</td>` +
-          `<td class="px-3 py-2 text-right text-xs ${trendClass[o.volumeTrend]}">${o.volumeTrend}</td>`
+          `<td class="px-3 py-2 text-right text-xs ${trendClass[o.volumeTrend]}">${o.volumeTrend}</td>` +
+          `<td class="px-3 py-2 text-right text-xs ${priceTrendClass[o.priceTrend]}" title="24h ${o.priceChange24hPercent.toFixed(1)}%">${priceTrendLabel[o.priceTrend]}</td>`
         )
       }
       function watchButton(address: string, active: boolean, label: string): string {
@@ -755,7 +894,7 @@ const favicon =
                         `<tr class="border-t border-neutral-900">${cells(o)}<td class="px-3 py-2 text-right">${watchButton(o.address, true, 'remove')}</td></tr>`,
                     )
                     .join('')
-                : '<tr><td colspan="7" class="px-3 py-3 text-sm text-neutral-500">Watched pools are not in the current top results.</td></tr>'
+                : '<tr><td colspan="8" class="px-3 py-3 text-sm text-neutral-500">Watched pools are not in the current top results.</td></tr>'
           } else {
             section.classList.add('hidden')
           }
@@ -815,6 +954,43 @@ const favicon =
         } finally {
           refreshing = false
         }
+      }
+
+      // Dollar projection for the risk table. Percentages are rendered server-side
+      // as data attributes; only the currency conversion happens here.
+      const NOTIONAL_KEY = 'lp-mine-notional'
+      function money(value: number): string {
+        const sign = value < 0 ? '-' : ''
+        return sign + '$' + Math.abs(value).toLocaleString('en-US', { maximumFractionDigits: 2 })
+      }
+      function renderNotional(): void {
+        const input = document.getElementById('notional-input') as HTMLInputElement | null
+        if (!input) return
+        const notional = Number(input.value)
+        if (!Number.isFinite(notional) || notional <= 0) return
+        localStorage.setItem(NOTIONAL_KEY, String(notional))
+        for (const row of document.querySelectorAll('tr[data-net-percent]')) {
+          const net = Number(row.getAttribute('data-net-percent'))
+          const daily = Number(row.getAttribute('data-daily-percent'))
+          const il = Number(row.getAttribute('data-il-percent'))
+          const netCell = row.querySelector('[data-cell="net-usd"]')
+          const feesCell = row.querySelector('[data-cell="fees-usd"]')
+          const beCell = row.querySelector('[data-cell="breakeven"]')
+          if (netCell) netCell.textContent = Number.isFinite(net) ? money((notional * net) / 100) : '—'
+          if (feesCell) feesCell.textContent = Number.isFinite(daily) ? money((notional * daily) / 100) : '—'
+          if (beCell) {
+            const loss = Math.abs(Math.min(0, Number.isFinite(il) ? il : 0))
+            beCell.textContent =
+              loss === 0 ? 'none' : Number.isFinite(daily) && daily > 0 ? (loss / daily).toFixed(1) + 'd' : 'never'
+          }
+        }
+      }
+      const notionalInput = document.getElementById('notional-input') as HTMLInputElement | null
+      if (notionalInput) {
+        const saved = localStorage.getItem(NOTIONAL_KEY)
+        if (saved) notionalInput.value = saved
+        notionalInput.addEventListener('input', renderNotional)
+        renderNotional()
       }
 
       void refresh()

@@ -11,6 +11,8 @@ type RawPoolAttributes = {
   reserve_in_usd?: unknown
   volume_usd?: { h6?: unknown; h24?: unknown }
   transactions?: { h24?: { buys?: unknown; sells?: unknown; buyers?: unknown; sellers?: unknown } }
+  base_token_price_usd?: unknown
+  quote_token_price_usd?: unknown
 }
 
 function toFiniteNumber(value: unknown): number | null {
@@ -62,6 +64,8 @@ export function normalizeGeckoPool(attributes: RawPoolAttributes): OpportunityPo
     volume24hUsd,
     volume6hUsd,
     ...(transactions24h ? { transactions24h } : {}),
+    basePriceUsd: toFiniteNumber(attributes.base_token_price_usd),
+    quotePriceUsd: toFiniteNumber(attributes.quote_token_price_usd),
   }
 }
 
