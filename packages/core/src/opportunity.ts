@@ -32,6 +32,8 @@ export type OpportunityPool = {
   name: string
   address: string
   feeTierPercent: number
+  /** 24h trade counts, when the source provides them (used for organic-volume checks). */
+  transactions24h?: { buys: number; sells: number; buyers: number; sellers: number }
   createdAt: Date
   marketCapUsd: number | null
   reserveUsd: number
@@ -54,6 +56,7 @@ export type ScoredOpportunity = {
   volumeTrend: VolumeTrend
   passesScreen: boolean
   screenNotes: readonly string[]
+  transactions24h?: { buys: number; sells: number; buyers: number; sellers: number }
 }
 
 export function scoreOpportunity(pool: OpportunityPool, now = new Date()): ScoredOpportunity {
@@ -94,6 +97,7 @@ export function scoreOpportunity(pool: OpportunityPool, now = new Date()): Score
     volumeTrend,
     passesScreen: screenNotes.length === 0,
     screenNotes,
+    ...(pool.transactions24h ? { transactions24h: pool.transactions24h } : {}),
   }
 }
 

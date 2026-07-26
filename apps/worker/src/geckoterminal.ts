@@ -1,4 +1,4 @@
-import type { OpportunityPool } from '@lp-mine/core'
+import type { DailyCandle, OpportunityPool } from '@lp-mine/core'
 
 const GECKOTERMINAL_BASE = 'https://api.geckoterminal.com/api/v2'
 const ROBINHOOD_NETWORK = 'robinhood'
@@ -10,6 +10,7 @@ type RawPoolAttributes = {
   market_cap_usd?: unknown
   reserve_in_usd?: unknown
   volume_usd?: { h6?: unknown; h24?: unknown }
+  transactions?: { h24?: { buys?: unknown; sells?: unknown; buyers?: unknown; sellers?: unknown } }
 }
 
 function toFiniteNumber(value: unknown): number | null {
@@ -40,6 +41,17 @@ export function normalizeGeckoPool(attributes: RawPoolAttributes): OpportunityPo
   const volume6hUsd = toFiniteNumber(attributes.volume_usd?.h6)
   if (reserveUsd === null || volume24hUsd === null || volume6hUsd === null) return null
 
+  const tx = attributes.transactions?.h24
+  const transactions24h =
+    tx === undefined
+      ? undefined
+      : {
+          buys: toFiniteNumber(tx.buys) ?? 0,
+          sells: toFiniteNumber(tx.sells) ?? 0,
+          buyers: toFiniteNumber(tx.buyers) ?? 0,
+          sellers: toFiniteNumber(tx.sellers) ?? 0,
+        }
+
   return {
     name: attributes.name,
     address: attributes.address,
@@ -49,7 +61,53 @@ export function normalizeGeckoPool(attributes: RawPoolAttributes): OpportunityPo
     reserveUsd,
     volume24hUsd,
     volume6hUsd,
+    ...(transactions24h ? { transactions24h } : {}),
   }
+}
+
+/**
+ * Daily candles in pool-ratio terms (quote token priced in the base token), which
+ * is the input divergence-loss and in-range math needs — a stablecoin's USD
+ * candles would show almost no movement and understate risk.
+ */
+export async function fetchDailyCandles(
+  poolAddress: string,
+  days = 10,
+  fetchImplementation: typeof fetch = fetch,
+): Promise<readonly DailyCandle[]> {
+  const url =
+    `${GECKOTERMINAL_BASE}/networks/${ROBINHOOD_NETWORK}/pools/${poolAddress}/ohlcv/day` +
+    `?limit=${days}&currency=token&token=quote`
+  const response = await fetchImplementation(url, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(20_000),
+  })
+  if (!response.ok) throw new Error(`GeckoTerminal OHLCV request failed (${response.status}) for ${poolAddress}`)
+  const payload: unknown = await response.json()
+  const list =
+    isRecord(payload) && isRecord(payload.data) && isRecord(payload.data.attributes)
+      ? payload.data.attributes.ohlcv_list
+      : undefined
+  if (!Array.isArray(list)) return []
+
+  const candles: DailyCandle[] = []
+  for (const row of list) {
+    if (!Array.isArray(row) || row.length < 6) continue
+    const values = row.slice(0, 6).map((value) => toFiniteNumber(value))
+    if (values.some((value) => value === null)) continue
+    const [timestamp, open, high, low, close, volume] = values as number[]
+    if (timestamp === undefined || close === undefined || close <= 0) continue
+    candles.push({
+      timestampSeconds: timestamp,
+      open: open ?? close,
+      high: high ?? close,
+      low: low ?? close,
+      close,
+      volumeUsd: volume ?? 0,
+    })
+  }
+  // Oldest first, so the first candle is the start of the observed window.
+  return candles.sort((left, right) => left.timestampSeconds - right.timestampSeconds)
 }
 
 /** Fetches and normalizes Robinhood Chain pools from GeckoTerminal's free public API. */

@@ -64,6 +64,20 @@ export { computeFeeYield } from './fee-yield.js'
 export type { FeeGrowthSample, FeeYield, FeeYieldOptions } from './fee-yield.js'
 export { computeTickOccupancy, percentToTickHalfWidth } from './tick-occupancy.js'
 export type { TickOccupancy, TickOccupancyBand } from './tick-occupancy.js'
+export {
+  assessOrganicVolume,
+  computeInRangeHistory,
+  computeYieldStability,
+  estimateRangeImpermanentLoss,
+} from './pool-risk.js'
+export type {
+  DailyCandle,
+  InRangeHistory,
+  OrganicVolumeAssessment,
+  OrganicVolumeInput,
+  RangeIlInput,
+  YieldStability,
+} from './pool-risk.js'
 export { buildDepositPlan } from './deposit-plan.js'
 export type { DepositPlan, DepositPlanInput } from './deposit-plan.js'
 export { OPPORTUNITY_CRITERIA, rankOpportunities, scoreOpportunity } from './opportunity.js'

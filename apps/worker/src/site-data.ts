@@ -5,6 +5,7 @@ import { buildMonitorHealthReport, type MonitorHealthReport } from './monitor-he
 import { readMonitorHealthConfig } from './monitor-health-config.js'
 import { buildPoolFeeReport, type PoolFeeReport } from './pools-fees.js'
 import { buildOpportunityReport, type OpportunityReport } from './pools-opportunities.js'
+import { buildPoolRiskReport, type PoolRiskReport } from './pool-risk-report.js'
 
 // Canonical pinned pair decimals (verified in the registry smoke check).
 const WETH_DECIMALS = 18
@@ -47,6 +48,7 @@ export type SiteData = {
   fees: PoolFeeReport
   depositPlan: DepositPlan | null
   opportunities: OpportunityReport | { error: string } | null
+  risk: PoolRiskReport | { error: string } | null
 }
 
 /** DB-only snapshot (offline-safe). Opportunities are attached separately. */
@@ -63,7 +65,15 @@ export function buildSiteData(environment: NodeJS.ProcessEnv = process.env, now 
     now,
   )
   const depositPlan = buildTopDepositPlan(fees, DEFAULT_RANGE_PERCENT)
-  return { schemaVersion: 1, generatedAt: now.toISOString(), health, fees, depositPlan, opportunities: null }
+  return {
+    schemaVersion: 1,
+    generatedAt: now.toISOString(),
+    health,
+    fees,
+    depositPlan,
+    opportunities: null,
+    risk: null,
+  }
 }
 
 /** Full snapshot including the best-effort third-party opportunity feed. */
@@ -73,7 +83,15 @@ export async function assembleSiteData(
 ): Promise<SiteData> {
   const data = buildSiteData(environment, now)
   try {
-    data.opportunities = await buildOpportunityReport({ now })
+    const opportunities = await buildOpportunityReport({ now })
+    data.opportunities = opportunities
+    // Risk analysis costs one OHLCV call per pool, so it runs here at deploy
+    // time rather than in the browser's frequent refresh.
+    try {
+      data.risk = await buildPoolRiskReport(opportunities.opportunities, { rangePercent: DEFAULT_RANGE_PERCENT, now })
+    } catch (error: unknown) {
+      data.risk = { error: error instanceof Error ? error.message : String(error) }
+    }
   } catch (error: unknown) {
     // A GeckoTerminal outage must not break the site build.
     data.opportunities = { error: error instanceof Error ? error.message : String(error) }
