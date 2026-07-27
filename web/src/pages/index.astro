@@ -287,6 +287,43 @@ const favicon =
         }
       </section>
 
+      <section class="mb-10">
+        <div class="mb-1 flex items-baseline justify-between gap-2">
+          <h2 class="text-sm font-medium text-neutral-100">My positions</h2>
+          <span id="positions-status" class="font-mono text-xs tabular-nums text-neutral-600"></span>
+        </div>
+        <p class="mb-3 text-pretty text-xs text-neutral-500">
+          Live LP position analytics for a wallet on Robinhood Chain, from Krystal. Read-only lookup: the
+          address is stored in this browser and used only to query. Nothing here can sign or move funds.
+        </p>
+        <label class="mb-4 flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+          Wallet address
+          <input
+            id="wallet-input"
+            type="text"
+            spellcheck="false"
+            placeholder="0x…"
+            class="w-[26rem] max-w-full rounded border border-neutral-800 bg-neutral-950 px-2 py-1 font-mono text-neutral-200"
+          />
+          <button
+            id="wallet-clear"
+            type="button"
+            class="rounded border border-neutral-700 px-2 py-1 text-neutral-400 hover:text-neutral-100"
+          >
+            clear
+          </button>
+        </label>
+        <div id="positions-body">
+          <div class="rounded-lg border border-neutral-800 p-6">
+            <p class="text-pretty text-sm text-neutral-400">No wallet address yet.</p>
+            <p class="mt-1 text-pretty text-xs text-neutral-500">
+              Paste the address you will provide liquidity from. Once a position exists, its value, PnL,
+              fees earned, APR and performance against holding appear here.
+            </p>
+          </div>
+        </div>
+      </section>
+
       <section class="mb-10" data-default-target={depositPlan?.poolAddress ?? ''}>
         <div class="mb-1 flex items-baseline justify-between gap-2">
           <h2 class="text-sm font-medium text-neutral-100">Deposit plan</h2>
@@ -725,6 +762,7 @@ const favicon =
     </main>
     <script>
       import { fetchAndRankOpportunities, type Opportunity } from '../lib/opportunity'
+      import { fetchPositionStats, isEvmAddress, type PositionStats } from '../lib/positions'
 
       const WATCHLIST_KEY = 'lp-mine-watchlist'
       const NUM = 'px-3 py-2 text-right font-mono tabular-nums'
@@ -993,8 +1031,99 @@ const favicon =
         renderNotional()
       }
 
+      // --- Position tracking (Krystal) ---
+      const WALLET_KEY = 'lp-mine-wallet'
+      function statCell(label: string, value: string, tone = 'text-neutral-100'): string {
+        return `<div><dt class="text-xs text-neutral-500">${label}</dt><dd class="font-mono tabular-nums ${tone}">${value}</dd></div>`
+      }
+      function signedMoney(value: number): string {
+        return (value >= 0 ? '+' : '-') + '$' + Math.abs(value).toLocaleString('en-US', { maximumFractionDigits: 2 })
+      }
+      function renderPositions(stats: PositionStats | null, message?: string): void {
+        const body = document.getElementById('positions-body')
+        if (!body) return
+        if (message) {
+          body.innerHTML = `<div class="rounded-lg border border-neutral-800 p-6"><p class="text-pretty text-sm text-neutral-400">${esc(message)}</p></div>`
+          return
+        }
+        if (!stats || stats.openPositionCount + stats.closedPositionCount === 0) {
+          body.innerHTML =
+            '<div class="rounded-lg border border-neutral-800 p-6">' +
+            '<p class="text-pretty text-sm text-neutral-400">No liquidity positions found for this address on Robinhood Chain.</p>' +
+            '<p class="mt-1 text-pretty text-xs text-neutral-500">It will populate here after you open a position.</p></div>'
+          return
+        }
+        const pnlTone = stats.pnl >= 0 ? 'text-emerald-400' : 'text-red-400'
+        const hodlTone = stats.compareWithHodl >= 0 ? 'text-emerald-400' : 'text-red-400'
+        body.innerHTML =
+          '<div class="rounded-lg border border-neutral-800 p-4">' +
+          '<dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm sm:grid-cols-4">' +
+          statCell('Open positions', String(stats.openPositionCount)) +
+          statCell('Current value', '$' + stats.currentPositionValue.toLocaleString('en-US', { maximumFractionDigits: 2 })) +
+          statCell('PnL', signedMoney(stats.pnl), pnlTone) +
+          statCell('vs holding', signedMoney(stats.compareWithHodl), hodlTone) +
+          statCell('APR', stats.apr.toFixed(2) + '%') +
+          statCell('Fee APR', stats.feeApr.toFixed(2) + '%', 'text-neutral-400') +
+          statCell('Earned 24h', '$' + stats.earning24h.toLocaleString('en-US', { maximumFractionDigits: 2 }), 'text-neutral-400') +
+          statCell('Unclaimed fees', '$' + stats.unclaimedFees.toLocaleString('en-US', { maximumFractionDigits: 2 }), 'text-neutral-400') +
+          '</dl>' +
+          '<p class="mt-3 text-pretty text-xs text-neutral-500">"vs holding" is this position against simply holding the deposited tokens — the measure that decides whether providing liquidity was worth it.</p>' +
+          '</div>'
+      }
+      async function refreshPositions(): Promise<void> {
+        const input = document.getElementById('wallet-input') as HTMLInputElement | null
+        const status = document.getElementById('positions-status')
+        if (!input) return
+        const address = input.value.trim()
+        if (!address) {
+          if (status) status.textContent = ''
+          return
+        }
+        if (!isEvmAddress(address)) {
+          if (status) status.textContent = 'invalid address'
+          return
+        }
+        localStorage.setItem(WALLET_KEY, address)
+        try {
+          const stats = await fetchPositionStats(address)
+          renderPositions(stats)
+          if (status) {
+            const now = new Date()
+            status.textContent =
+              'live · ' +
+              now.toISOString().slice(11, 19) +
+              ' UTC · ' +
+              now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Jakarta', hour12: false }) +
+              ' WIB'
+          }
+        } catch (error) {
+          if (status) status.textContent = 'lookup failed'
+          renderPositions(null, error instanceof Error ? error.message : 'Position lookup failed.')
+        }
+      }
+      const walletInput = document.getElementById('wallet-input') as HTMLInputElement | null
+      if (walletInput) {
+        const saved = localStorage.getItem(WALLET_KEY)
+        if (saved) walletInput.value = saved
+        let walletTimer: number | undefined
+        walletInput.addEventListener('input', () => {
+          window.clearTimeout(walletTimer)
+          walletTimer = window.setTimeout(() => void refreshPositions(), 600)
+        })
+        document.getElementById('wallet-clear')?.addEventListener('click', () => {
+          walletInput.value = ''
+          localStorage.removeItem(WALLET_KEY)
+          const status = document.getElementById('positions-status')
+          if (status) status.textContent = ''
+          renderPositions(null)
+        })
+        if (saved) void refreshPositions()
+      }
+
       void refresh()
       setInterval(() => void refresh(), REFRESH_MS)
+      // Positions change slowly; refresh them on the same cadence as the tab wakes.
+      setInterval(() => void refreshPositions(), 60_000)
       // Refresh immediately when the tab becomes visible again.
       document.addEventListener('visibilitychange', () => {
         if (!document.hidden) void refresh()
