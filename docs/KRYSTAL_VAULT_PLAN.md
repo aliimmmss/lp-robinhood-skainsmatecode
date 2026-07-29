@@ -18,7 +18,34 @@ This is a configuration draft for you to review, not advice to deploy capital. E
 
 ## Agent instruction — copy and paste this
 
-Paste this whole block into the vault's agent instruction field.
+The instruction field takes a **short natural-language description**, not a config file. Krystal's own AI expands what you write into a structured strategy; the long JSON some vaults display is that generated output, not something a person typed. Krystal's documented examples are one-liners such as *"Maximize APR on ETH pairs while managing IL."*
+
+Paste this (800 characters):
+
+```text
+Farm Robinhood Chain pools for net profit after impermanent loss, not headline APR. Enter only pools 72h+ old with a verified token contract, TVL above $25k, 24h volume above $25k, $75+/day absolute fees, and 50+ unique traders. Reject APR driven by a one-hour or one-day volume spike. Require expected fees to beat expected divergence loss by 20%. Set the range to the narrowest band the pool's recent daily closes held on 60%+ of days; skip the pool if none qualifies. Never rebalance into a sustained trend. Size positions near $200 and never above 1% of pool TVL. Harvest to ETH at $2, never compound. Hold through temporary out-of-range and one-off APR cooling. Exit only on contract failure, honeypot, depeg, impaired exit routes, or 7 straight days underperforming a simple hold after 14 days.
+```
+
+If the field rejects that length, this 438-character version keeps the load-bearing constraints:
+
+```text
+Farm Robinhood Chain pools for net profit after impermanent loss, not APR. Only pools 72h+ old, verified contract, TVL and volume over $25k, $75+/day fees. Require expected fees to beat divergence loss by 20%. Use the narrowest range the price held 60%+ of days, else skip. No rebalancing into trends. ~$200 per position, max 1% of TVL. Harvest to ETH, no compounding. Exit only on contract failure or 7 days underperforming a plain hold.
+```
+
+Every clause is load-bearing. In rough order of what Krystal's default behaviour is least likely to do on its own: **net after impermanent loss** rather than APR, the **72h age floor**, the **range chosen from actual in-range history**, and **not rebalancing into a trend**. If you have to cut further, cut from the end of the list, not the start.
+
+## Verifying Krystal's expansion
+
+After the agent expands your instruction, read what it generated and check it against the reference below. This is the same strategy expressed in the structured form Krystal produces, so it is a checklist for "did the AI understand the intent", not something to paste.
+
+Watch for these specific ways an expansion can drift from the instruction:
+
+- an age floor lower than 72 hours, or an "early ignition" exception that admits new pools anyway
+- ranking or entry driven by APR with no divergence-loss term
+- `compound` enabled, or permission to increase liquidity on an existing position
+- a fixed range width instead of one derived from price history
+- no exit condition at all, or conversely an exit on negative PnL alone
+- position sizing without the 1%-of-TVL cap
 
 ```json
 {
@@ -346,11 +373,13 @@ Paste this whole block into the vault's agent instruction field.
 
 ## Vault settings
 
-| Field | Value | Why |
-| --- | --- | --- |
-| Risk level | Medium | High risk in that UI biases toward the launch-frenzy pools we deliberately exclude. |
-| Expected run | Balanced | Max gain optimizes gross APR, which is the metric that hid a −25.9% net result in our own measurements. |
-| Farming style | Active | The strategy does rebalance and re-enter; passive would not act. |
+These are UI controls, separate from the instruction text. Krystal's documented options:
+
+| Field | Options | Choose | Why |
+| --- | --- | --- | --- |
+| Risk Level | High Risk / Balanced / Safe | **Balanced** | High Risk biases toward the launch-frenzy pools this strategy deliberately excludes. Safe likely excludes everything on a chain this young. |
+| Expected Return | Max Gain / Growth Mode / Steady Yield | **Steady Yield** | Max Gain optimizes the gross APR that hid a −25.9% net result in our own measurements. |
+| Farming Style | Passive / Smart / Active | **Smart** | Passive will not rebalance at all, which this strategy needs. Active risks over-trading against the instruction's "never rebalance into a trend" rule. Krystal does not document what these three actually change, so treat this as a starting guess and revisit once you can see how often it acts. |
 
 ## Auto-farm permissions
 
@@ -374,7 +403,7 @@ Paste this whole block into the vault's agent instruction field.
 
 1. **Fund a fresh wallet** with an amount you would accept losing entirely. Do not use your main wallet. This grants standing authority to an automation contract.
 2. **Create the vault** at defi.krystal.app on Robinhood Chain, with the settings tables above.
-3. **Paste the agent instruction** JSON into the instruction field.
+3. **Paste the instruction text** (the 800-character block) into the preferences field, then **read what the agent generates** and check it against the drift list above. If it dropped the age floor or the divergence-loss requirement, restate that clause and regenerate before funding.
 4. **Set permissions** exactly as listed — specifically leave Compound and Increase Liquidity off.
 5. **Review and sign** the vault creation and permission transactions in your own wallet. Read what each one authorizes. I cannot do this step and will not ask you for keys.
 6. **Record the vault address**, then paste your wallet address into the **My positions** panel on our dashboard so you can track it independently of Krystal's own reporting.
