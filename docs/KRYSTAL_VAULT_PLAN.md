@@ -391,13 +391,71 @@ These are UI controls, separate from the instruction text. Krystal's documented 
 | Compound | **no** | `compound_enabled` is false: harvest to ETH and deploy deliberately in $200 units instead of silently growing one position |
 | Increase Liquidity | **no** | prevents the agent quietly concentrating the vault into one pool |
 
-## Other auto-farm fields
+## Scopes panel
 
-| Field | Value |
+These are hard numeric gates the interface enforces, so they are more reliable than the same intent expressed in prose. Set them even where the instruction text already says the same thing.
+
+| Field | Value | Reasoning |
+| --- | --- | --- |
+| Min. Range | **10%** | Floor only; the instruction widens it when price history demands. |
+| Min. TVL | **$25,000** | Our exit-impact estimate: a $200 position is 0.8% of a $25k pool, inside the 1% cap. At $10k it would be 2%. |
+| Whitelisted Pools | **see below** | The single highest-leverage field on this screen. |
+| Max Drawdown (24h) | **-35** | Matches the 35% token-drawdown limit; the -50 placeholder tolerates a halving in a day. |
+| Prioritize By | prefer **Fee**, or fees-per-TVL if offered. Avoid **APR** | APR is nomination, not proof — the finding this whole project rests on. Tell me the dropdown options and I will pick precisely. |
+
+Multi-window minimums. The important trick: **requiring a 7-day figure implicitly requires 7 days of history**, which enforces the age floor in a way the UI can police.
+
+| Field | 1h | 24h | 7d | 30d |
+| --- | --- | --- | --- | --- |
+| Min. APR | **0** | **30** | **20** | **0** |
+| Min. Volume | **0** | **25000** | **175000** | **0** |
+| Min. Fee | **0** | **75** | **525** | **0** |
+
+Why those:
+
+- **1h stays 0 deliberately.** A minimum here would *require* a one-hour spike — the exact false-ignition pattern we reject. Leaving it blank is a decision, not an omission.
+- **APR 24h at 30%, not 70%+.** A higher APR floor pushes selection *toward* memecoins. Our pinned WETH/USDG pools measured roughly 61% gross annualized, so 30% admits sound pools while still excluding dead ones. This is the one place we deliberately go lower than the RAPTOR-X approach.
+- **APR 7d at 20%** is below the 24h figure because a week-long average includes quiet days. Its real job is demanding a week of history.
+- **Volume and Fee 7d are 7× the daily floors**, keeping the windows consistent.
+- **30d stays 0** because Robinhood Chain itself is only about two months old; requiring 30-day figures would exclude nearly everything, including pools that are genuinely fine.
+
+### Whitelisted Pools — the decision that matters most
+
+Left empty, the agent selects from every pool on the chain and the numeric gates above are your only protection. Filled in, it can only touch pools you listed, and your own analysis replaces its pool-picking entirely.
+
+For a first vault, whitelisting the four on-chain-verified WETH/USDG pools from our registry is the conservative option: modest measured yield (net roughly +0.8% to +1.2% over ten days), 100% in-range, contract addresses we verify fail-closed. Leaving it empty is how you find the higher-yield pools, and also how you end up in a two-day-old launch pool. You can widen it later; you cannot un-lose capital.
+
+## Execution Config panel
+
+| Field | Value | Reasoning |
+| --- | --- | --- |
+| Max. Swap Slippage | **0.5%** | Keep the default. A reverted rebalance costs $0.03; a bad fill costs real value. Raise to 1% only if you whitelist volatile pools and see rebalances failing. |
+| Max. Liquidity Slippage | **0.5%** | Same reasoning. |
+| Max. Withdraw Slippage | **0.5%** | This one governs exits. Keeping it tight is what stops a panic unwind at a bad price. |
+| Cool-down Period | **1 hour** | Scan often, act rarely: the instruction limits any single position to one adjustment per day, so a short cooldown costs nothing and lets safety exits happen promptly. Raise it if you observe over-trading. |
+| Max. Value Per Strategy | **25–30%**, but see the arithmetic below | Caps how much of the vault lands in one position; 25% implies at least four. |
+| Gas Fee Ceiling | switch to **$** and set **$0.50** | Measured Robinhood Chain costs: mint $0.020, harvest $0.007, rebalance $0.029. A percentage ceiling of 10% on a $200 position authorizes $20 of gas — roughly 700× the real cost. An absolute $0.50 leaves ample headroom while blocking a genuine gas spike. |
+| Strict Cap | **On** | Enforces the per-strategy cap rather than treating it as advisory. Krystal does not document the exact difference, so this is the cautious reading. |
+| Default Asset | **ETH** | The strategy is ETH-denominated throughout: gas in ETH, harvest to ETH, entries funded from ETH. Matching the denomination avoids conversion drift in the caps. |
+
+### Max Value Per Strategy conflicts with a small vault
+
+The instruction sizes positions near $200. A percentage cap turns that into a minimum vault size:
+
+| Cap | Smallest vault where a $200 position is allowed |
 | --- | --- |
-| Min TVL | **$25,000** (not $10,000 — thin pools fail our exit-impact limit) |
-| Min Range | **10%** minimum, but the instruction overrides upward when history demands it |
-| Interval | **1 hour** |
+| 100% | $200 |
+| 50% | $400 |
+| 30% | $667 |
+| 25% | $800 |
+
+If the vault holds less than the figure in the right column, the cap forbids the position size the instruction asks for, and the agent will either do nothing or quietly pick one of the two to ignore. Resolve it deliberately, one of three ways:
+
+1. Fund enough that 25–30% clears $200 (about $700–800), and keep the diversification cap.
+2. Start with the cap at 100% and accept a single position until harvests grow the balance.
+3. Lower the position size in the instruction text to match a smaller vault, remembering that rebalancing at $0.029 is a meaningful drag on a $20 position and trivial on a $200 one.
+
+There is no right answer here; it depends on the amount you have decided to risk, which is yours to choose.
 
 ## Your steps — the parts only you can do
 
