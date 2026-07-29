@@ -1,57 +1,59 @@
-# Krystal auto-farm vault — plan, config, and your steps
+# Krystal auto-farm vault — plan, configs, and your steps
 
-A starting configuration for a Krystal Auto-Farm Vault on Robinhood Chain, derived from the measurements this repository produces. It keeps the parts of the published RAPTOR-X approach that are well-engineered and repairs the two places where that design can lose money quietly.
+Configuration for a Krystal Auto-Farm Vault on Robinhood Chain, derived from the measurements this repository produces. It keeps the parts of the published RAPTOR-X approach that are well engineered and repairs the two places where that design can lose money quietly.
 
 This is a configuration draft for you to review, not advice to deploy capital. Every signature and every amount is yours. Nothing in this repository can sign, move, or authorize anything.
+
+## Availability on Robinhood Chain
+
+| Check | Result |
+| --- | --- |
+| Chain in Krystal's chain list | yes — `{"id":4663,"name":"robinhood"}` |
+| Uniswap v2/v3/v4 with `supportPositions` | yes, per `lp_explorer/configs` |
+| Automator contract (v3) | `0x6ed60864fb8fb610a65af5d16cef272548bc64d6` — **verified deployed, 21475 bytes** |
+| Automator contract (v4) | `0x542298e710b32b49883577883b75b39ef18883ce` — **verified deployed, 14768 bytes** |
+| Krystal's own docs | list auto-rebalance for Ethereum, Arbitrum, Base, BNB, Optimism, Polygon — **Robinhood is not listed** |
+
+The contracts exist on-chain, so the feature works, but Robinhood is undocumented for it: no documented support commitment and less field time than the chains they do list. Neither contract has been audited by us; verified-deployed means code exists at those addresses, nothing more.
+
+Separately, Krystal's pool analytics (`lp_explorer/top_pools`, `pool_detail`) reject chain 4663 outright, and the per-position endpoints are blocked to programmatic clients. Only `lp/stats` is usable, which is what our dashboard's position tracking uses.
 
 ## What we changed versus RAPTOR-X, and why
 
 | Area | RAPTOR-X | This config | Reason |
 | --- | --- | --- | --- |
-| Divergence loss | absent entirely | required net-positive after divergence loss | Its own picks measured −39% and −35% divergence loss in two days. Gross fees alone hid that. |
-| Exiting | `negative_pnl_never_authorizes_exit`, positions are permanent | exit on sustained net-negative after a grace period | Never exiting turns every bad entry into permanent dead capital while the headline APR reflects only the live earners. |
-| Pool age | 1-day-old pools admitted via early ignition | minimum 72h, and 7-day history required for full size | Its top four picks had 1–2 days of history. That is launch-frenzy farming. |
-| Range | 10% fixed minimum | width chosen from measured in-range history | Our data: volatile pools closed inside ±10% on 11–30% of days, so a 10% band is mostly out of range. |
-| Absolute fees | $75/day floor | kept, unchanged | Good idea; we adopted it into our own screen. |
+| Divergence loss | absent entirely | required net-positive after divergence loss | Its own top picks measured −39% and −35% divergence loss in two days. Gross fees alone hid that. |
+| Exiting | `negative_pnl_never_authorizes_exit`; positions permanent | exit after 14 days if it has underperformed a plain hold for 7 straight days | Never exiting turns every bad entry into permanent dead capital while the headline APR reflects only the live earners. |
+| Pool age | 1-day-old pools admitted via early ignition | minimum 72h | Its top four picks had 1–2 days of history. That is launch-frenzy farming. |
+| Range | fixed 10% minimum | width chosen from measured in-range history | Our data: volatile pools closed inside ±10% on 11–30% of days, so a fixed 10% band is mostly out of range while still accruing divergence loss. |
+| Absolute fees | $75/day floor | kept | Good idea; we adopted it into our own screen too. |
 | Token safety | full firewall | kept, plus explorer verification | Genuinely strong; nothing to improve. |
-| Position sizing | ≤1% pool TVL, ≤5% exit liquidity | kept, unchanged | Sound. |
+| Position sizing | ≤1% pool TVL, ≤5% exit liquidity | kept | Sound. |
 
-## Agent instruction — copy and paste this
+## Measured costs on Robinhood Chain
 
-The instruction field takes a **short natural-language description**, not a config file. Krystal's own AI expands what you write into a structured strategy; the long JSON some vaults display is that generated output, not something a person typed. Krystal's documented examples are one-liners such as *"Maximize APR on ETH pairs while managing IL."*
+Gas price observed at **0.0217 gwei**, which makes small positions far more viable here than on mainnet.
 
-Paste this (800 characters):
+| Operation | Cost |
+| --- | --- |
+| ERC-20 approve | $0.0020 |
+| Mint v3 position | $0.0204 |
+| Collect fees (harvest) | $0.0073 |
+| Rebalance (burn + mint) | $0.0285 |
 
-```text
-Farm Robinhood Chain pools for net profit after impermanent loss, not headline APR. Enter only pools 72h+ old with a verified token contract, TVL above $25k, 24h volume above $25k, $75+/day absolute fees, and 50+ unique traders. Reject APR driven by a one-hour or one-day volume spike. Require expected fees to beat expected divergence loss by 20%. Set the range to the narrowest band the pool's recent daily closes held on 60%+ of days; skip the pool if none qualifies. Never rebalance into a sustained trend. Size positions near $200 and never above 1% of pool TVL. Harvest to ETH at $2, never compound. Hold through temporary out-of-range and one-off APR cooling. Exit only on contract failure, honeypot, depeg, impaired exit routes, or 7 straight days underperforming a simple hold after 14 days.
-```
+## Starter vault — validation scale
 
-If the field rejects that length, this 438-character version keeps the load-bearing constraints:
+At this size the vault is a **plumbing test, not an income strategy**. A $9.50 position at the pinned pools' measured rate earns roughly **$0.011/day, about $0.34/month**. The point is to confirm the machinery works: the vault opens a position, it appears in the dashboard's **My positions** panel, and Krystal's `vs holding` figure agrees with our own on-chain analysis. Those questions answer identically at $10 and at $1,000, and at $10 the first mistake costs nothing.
 
-```text
-Farm Robinhood Chain pools for net profit after impermanent loss, not APR. Only pools 72h+ old, verified contract, TVL and volume over $25k, $75+/day fees. Require expected fees to beat divergence loss by 20%. Use the narrowest range the price held 60%+ of days, else skip. No rebalancing into trends. ~$200 per position, max 1% of TVL. Harvest to ETH, no compounding. Exit only on contract failure or 7 days underperforming a plain hold.
-```
+Do not judge yield from a vault this small. Dust and rounding distort the percentages more than real performance does.
 
-Every clause is load-bearing. In rough order of what Krystal's default behaviour is least likely to do on its own: **net after impermanent loss** rather than APR, the **72h age floor**, the **range chosen from actual in-range history**, and **not rebalancing into a trend**. If you have to cut further, cut from the end of the list, not the start.
-
-## Verifying Krystal's expansion
-
-After the agent expands your instruction, read what it generated and check it against the reference below. This is the same strategy expressed in the structured form Krystal produces, so it is a checklist for "did the AI understand the intent", not something to paste.
-
-Watch for these specific ways an expansion can drift from the instruction:
-
-- an age floor lower than 72 hours, or an "early ignition" exception that admits new pools anyway
-- ranking or entry driven by APR with no divergence-loss term
-- `compound` enabled, or permission to increase liquidity on an existing position
-- a fixed range width instead of one derived from price history
-- no exit condition at all, or conversely an exit on negative PnL alone
-- position sizing without the 1%-of-TVL cap
+### Agent instruction JSON — paste this
 
 ```json
 {
   "system": "LP-MINE-NET",
-  "version": "1.0.0-RH",
-  "strategy_name": "LP-MINE-NET v1.0.0-RH Net-Truth Robinhood Chain Fee Farmer",
+  "version": "1.0.0-RH-starter",
+  "strategy_name": "LP-MINE-NET Starter - Robinhood Chain Net-Truth Validation Vault",
   "target_network": {
     "name": "Robinhood Chain",
     "chain_id": 4663,
@@ -59,8 +61,8 @@ Watch for these specific ways an expansion can drift from the instruction:
     "rpc_reference": "https://rpc.mainnet.chain.robinhood.com",
     "block_explorer_reference": "https://robinhoodchain.blockscout.com"
   },
-  "primary_objective": "Grow realized ETH-denominated value by farming Robinhood Chain LP pools whose fee income is expected to exceed divergence loss, not merely whose gross fee yield or APR is high. Admit pools on pool-level fee truth, executable exit liquidity, token contract safety, and demonstrated price behaviour. Size positions so that a single failure cannot dominate the vault. Hold through ordinary drawdown and temporary out-of-range states, but do not hold indefinitely a position that has proven net-negative against simply holding its tokens.",
-  "goal_statement_short": "Farm fee income that survives divergence loss. Enter on fee truth and safety, size small, hold through noise, and close positions that have demonstrably failed rather than holding them forever.",
+  "primary_objective": "Validate the full automation path at minimal scale while never entering a pool that fails the net-truth gates. Deploy nearly the whole balance as one position, retaining only a small ETH gas reserve. Admit pools on pool-level fee truth, executable exit liquidity, token contract safety, and demonstrated price behaviour, and only when expected fee income exceeds expected divergence loss. Prefer doing nothing over entering a pool that fails a gate.",
+  "goal_statement_short": "Prove the machinery works at $10 without relaxing any safety or net-truth gate. One position, tiny gas reserve, no compounding.",
   "execution_contract": {
     "schema_mode": "strict_json_only",
     "stateless_assumption": true,
@@ -72,8 +74,8 @@ Watch for these specific ways an expansion can drift from the instruction:
       "validate token contracts and executable exit liquidity",
       "apply fee-truth and false-ignition gates",
       "require expected net-positive fee income after divergence loss",
-      "open qualified positions when spendable ETH permits",
-      "maintain range on incumbents when maintenance is economically justified",
+      "open one qualified position when spendable ETH permits",
+      "maintain range on the incumbent when maintenance is economically justified",
       "close only on safety failure or proven sustained net-negative performance",
       "harvest to ETH at threshold",
       "if any action or lookup fails, isolate the failure and hold"
@@ -86,20 +88,20 @@ Watch for these specific ways an expansion can drift from the instruction:
     "compound_enabled": false,
     "external_deposit_assumption": "none",
     "gas_only_reserve_enabled": true,
-    "target_gas_reserve_usd": 15,
-    "hard_minimum_gas_reserve_usd": 10,
-    "dynamic_gas_reserve_rule": "Retain the greater of $10 in ETH or five times the estimated cost of the most expensive authorized transaction.",
+    "target_gas_reserve_usd": 0.5,
+    "hard_minimum_gas_reserve_usd": 0.25,
+    "dynamic_gas_reserve_rule": "Retain the greater of $0.25 in ETH or ten times the estimated cost of the most expensive authorized transaction. Measured costs on this chain are about $0.02 to mint and $0.03 to rebalance, so a $0.50 reserve is ample.",
     "never_swap_reserved_gas_eth": true,
     "fund_new_positions_from_idle_eth_first": true,
     "never_use_incumbent_principal_to_fund_a_new_position": true
   },
   "portfolio_structure": {
-    "position_count_policy": "Grow position count while distinct qualified pools and spendable ETH exist. No fixed target.",
+    "position_count_policy": "Hold one position at this scale. Do not fragment a small balance across multiple positions.",
     "unique_pair_required": true,
     "unique_primary_non_quote_token_required": true,
     "max_same_primary_token_positions": 1,
     "max_combined_deployed_fraction": 0.95,
-    "soft_max_single_position_share_of_total_vault_value": 0.25
+    "soft_max_single_position_share_of_total_vault_value": 1.0
   },
   "candidate_admission_engine": {
     "mode": "net_truth_first",
@@ -107,13 +109,11 @@ Watch for these specific ways an expansion can drift from the instruction:
     "required_pair_shape": "Exactly one allowed quote asset paired with one distinct non-quote token. Stablecoin-to-stablecoin pairs are blocked.",
     "rank_candidates_by": [
       "expected_net_return_after_divergence_loss",
+      "absolute_fees_7d",
       "fees_per_tvl_24h",
-      "absolute_fees_24h",
       "in_range_history_share",
-      "volume_per_tvl_24h",
       "executable_exit_liquidity",
-      "token_safety",
-      "route_simplicity"
+      "token_safety"
     ],
     "standard_entry_thresholds": {
       "minimum_pool_age_hours": 72,
@@ -134,12 +134,6 @@ Watch for these specific ways an expansion can drift from the instruction:
       "minimum_history_days": 7,
       "minimum_days_price_closed_within_target_band_fraction": 0.6,
       "yield_must_not_be_single_day_spike_driven": true
-    },
-    "reduced_size_band": {
-      "enabled": true,
-      "applies_when_history_days_between": [3, 7],
-      "size_multiplier": 0.5,
-      "must_pass_all_other_gates": true
     },
     "minimum_data_quality": {
       "reject_zero_missing_or_stale_pool_tvl": true,
@@ -201,17 +195,16 @@ Watch for these specific ways an expansion can drift from the instruction:
     "maximum_estimated_total_entry_cost_fraction_of_position": 0.015
   },
   "position_sizing": {
-    "mode": "fixed_unit_entry",
-    "minimum_new_position_value_usd": 200,
-    "default_new_position_value_usd": 200,
+    "mode": "deploy_available_balance_as_one_position",
+    "minimum_new_position_value_usd": 5,
+    "default_new_position_value_usd": 9.5,
     "entry_funding_asset": "ETH",
     "additional_caps": {
       "position_must_not_exceed_fraction_of_pool_tvl": 0.01,
-      "position_must_not_exceed_fraction_of_estimated_executable_exit_liquidity": 0.05,
-      "reduced_history_size_multiplier": 0.5
+      "position_must_not_exceed_fraction_of_estimated_executable_exit_liquidity": 0.05
     },
     "anti_fragmentation": {
-      "do_not_open_any_position_below_usd": 200,
+      "do_not_open_any_position_below_usd": 5,
       "maximum_dust_positions": 0
     }
   },
@@ -275,13 +268,11 @@ Watch for these specific ways an expansion can drift from the instruction:
     "enabled": true,
     "harvest_asset": "ETH",
     "compound_enabled": false,
-    "harvest_threshold_usd": 2.0,
+    "harvest_threshold_usd": 0.1,
     "harvest_is_non_blocking_best_effort": true,
     "realized_eth_use_order": [
-      "restore the dynamic gas reserve",
-      "accumulate until spendable ETH above the reserve reaches $200",
-      "fund another distinct qualified position",
-      "remain idle when no fully qualified use exists"
+      "restore the gas reserve",
+      "remain idle; do not open a second position at this scale"
     ],
     "on_harvest_failure": {
       "keep_position_unchanged": true,
@@ -362,114 +353,112 @@ Watch for these specific ways an expansion can drift from the instruction:
     "do_not_reuse_contract_addresses_from_another_chain",
     "do_not_spend_reserved_gas_ETH",
     "do_not_compound_harvests",
-    "do_not_use_principal_from_any_incumbent_to_fund_a_new_position",
+    "do_not_fragment_a_small_balance_into_multiple_positions",
     "do_not_close_a_position_for_temporary_out_of_range_status_or_a_single_cooling_snapshot",
     "do_not_hold_indefinitely_a_position_that_has_underperformed_holding_its_tokens_for_over_a_week_and_no_longer_qualifies",
     "do_not_convert_execution_failure_into_churn"
   ],
-  "final_instruction": "Operate as a net-truth Robinhood Chain fee farmer. Use APR only to nominate candidates. Admit a pool only when it is at least 72 hours old, its token contract is verified, pool-level fee truth and unique-trader counts hold up, entry and reverse exit routes quote within impact limits, and expected fee income over the holding horizon exceeds expected divergence loss with at least a 20% margin. Choose the range band that the pool's own recent daily closes actually respected at least 60% of the time; if no band reaches that, do not open. Fund each position with approximately $200 of ETH above a dynamic gas reserve, never exceeding 1% of pool TVL or 5% of executable exit liquidity, and halve size when history is between three and seven days. Harvest to ETH at $2 and do not compound. Hold through ordinary drawdown, temporary out-of-range states, and single-snapshot APR cooling. Maintain range in the same pool at most once per day when the condition persists across two scans and projected fee recovery exceeds execution cost, and never rebalance into a sustained trend. Close on verified contract failure, exploit, honeypot, depeg, impaired exit mechanics, or when a position at least 14 days old has underperformed simply holding its tokens for seven consecutive days and no longer meets entry thresholds. If any lookup or execution step fails, isolate the failure and hold."
+  "final_instruction": "Operate as a validation-scale net-truth fee farmer on Robinhood Chain. Deploy up to 95% of the balance as a single position and retain the rest as an ETH gas reserve of about $0.50, never below $0.25. Use APR only to nominate candidates. Admit a pool only when it is at least 72 hours old, its token contract is verified on the block explorer, pool TVL and 24h volume both exceed $25,000, absolute fees exceed $75 per day, at least 50 unique traders traded it in 24 hours, entry and reverse exit routes quote inside impact limits, and expected fee income over the holding horizon exceeds expected divergence loss by at least 20%. Choose the range band that the pool's own recent daily closes respected on at least 60% of days; if no band reaches that, do not open a position at all. Never exceed 1% of pool TVL or 5% of executable exit liquidity. Harvest to ETH at $0.10 and never compound. Do not open a second position at this scale. Hold through ordinary drawdown, temporary out-of-range states, and single-snapshot APR cooling. Maintain range in the same pool at most once per day, only when the condition persists across two scans and projected fee recovery exceeds execution cost, and never rebalance into a sustained trend. Close on verified contract failure, exploit, honeypot, depeg, impaired exit mechanics, or when a position at least 14 days old has underperformed simply holding its two tokens for seven consecutive days. If any lookup or execution step fails, isolate the failure and hold."
 }
 ```
 
-## Vault settings
+### UI settings for the starter vault
 
-These are UI controls, separate from the instruction text. Krystal's documented options:
-
-| Field | Options | Choose | Why |
-| --- | --- | --- | --- |
-| Risk Level | High Risk / Balanced / Safe | **Balanced** | High Risk biases toward the launch-frenzy pools this strategy deliberately excludes. Safe likely excludes everything on a chain this young. |
-| Expected Return | Max Gain / Growth Mode / Steady Yield | **Steady Yield** | Max Gain optimizes the gross APR that hid a −25.9% net result in our own measurements. |
-| Farming Style | Passive / Smart / Active | **Smart** | Passive will not rebalance at all, which this strategy needs. Active risks over-trading against the instruction's "never rebalance into a trend" rule. Krystal does not document what these three actually change, so treat this as a starting guess and revisit once you can see how often it acts. |
-
-## Auto-farm permissions
-
-| Permission | Grant | Why |
+| Panel | Field | Value |
 | --- | --- | --- |
-| Open Position | yes | required to deploy |
-| Harvest | yes | required to realize fees |
-| Rebalance | yes | required for range maintenance |
-| Compound | **no** | `compound_enabled` is false: harvest to ETH and deploy deliberately in $200 units instead of silently growing one position |
-| Increase Liquidity | **no** | prevents the agent quietly concentrating the vault into one pool |
+| Preferences | Risk Level | **Balanced** |
+| Preferences | Expected Return | **Steady Yield** |
+| Preferences | Farming Style | **Smart** |
+| Scopes | Min. Range | **10%** |
+| Scopes | Min. TVL | **$25,000** |
+| Scopes | Whitelisted Pools | see note below |
+| Scopes | Max Drawdown (24h) | **-35** |
+| Scopes | Prioritize By | **Fee (7d)** |
+| Scopes | Min. APR | 1h **0** · 24h **30** · 7d **20** · 30d **0** |
+| Scopes | Min. Volume | 1h **0** · 24h **25000** · 7d **175000** · 30d **0** |
+| Scopes | Min. Fee | 1h **0** · 24h **75** · 7d **525** · 30d **0** |
+| Execution | Max. Swap Slippage | **0.5%** |
+| Execution | Max. Liquidity Slippage | **0.5%** |
+| Execution | Max. Withdraw Slippage | **0.5%** |
+| Execution | Cool-down Period | **1 hour** |
+| Execution | Max. Value Per Strategy | **100%** |
+| Execution | Gas Fee Ceiling | **$** mode, **0.15** |
+| Execution | Strict Cap | **On** |
+| Execution | Default Asset | **ETH** |
+| Permissions | Open Position / Harvest / Rebalance | **on** |
+| Permissions | Compound / Increase Liquidity | **off** |
 
-## Scopes panel
+Reasoning for the less obvious ones:
 
-These are hard numeric gates the interface enforces, so they are more reliable than the same intent expressed in prose. Set them even where the instruction text already says the same thing.
+- **Max Value Per Strategy 100%** because a percentage cap becomes a minimum vault size. At 25%, a $9.50 position would require a $38 vault; at 30% it needs $32. With one intended position, 100% removes the contradiction.
+- **Gas Fee Ceiling $0.15** against measured costs of $0.02 to mint and $0.03 to rebalance — roughly 5× headroom, while a 10% ceiling on a $9.50 position would authorize $0.95, about 33× the real cost.
+- **1h minimums stay 0 deliberately.** A value there would *require* a one-hour spike, the exact false-ignition pattern this strategy rejects. Blank is a decision, not an omission.
+- **Min APR 24h at 30, not 70+.** A higher APR floor pushes selection toward memecoins. Our pinned WETH/USDG pools measured about 61% gross annualized, so 30 admits sound pools while excluding dead ones. This is deliberately lower than published practice.
+- **7d fields do double duty.** Requiring a 7-day figure implicitly requires seven days of history, letting the interface enforce the age floor.
+- **30d stays 0** because Robinhood Chain is only about two months old; requiring 30-day figures would exclude nearly everything, including sound pools.
+- **Prioritize By Fee (7d)** ranks by absolute fee dollars over a window long enough to exclude spikes. Avoid every APR option: APR is nomination, not proof. Avoid Volume, since our own gate rejects high volume with negligible fees. Avoid TVL, which is the blue-chip drift trap. `Drawdown (most stable)` is a defensible alternative that optimizes the divergence-loss side instead of the fee side.
 
-| Field | Value | Reasoning |
+**Whitelisted Pools** is the highest-leverage field here. Left empty, the agent picks from every pool on the chain and the numeric gates are your only protection. Filled with the four on-chain-verified WETH/USDG pools from our registry, your analysis replaces its pool selection entirely: modest measured yield, 100% in-range, addresses we verify fail-closed. For a first vault the whitelist is the conservative option. You can widen it later; you cannot un-lose capital.
+
+## Scaling up later
+
+When you increase the balance, change only these fields. Everything else — every safety gate, every threshold, the range system — stays identical.
+
+| Field | Starter | Scaled |
 | --- | --- | --- |
-| Min. Range | **10%** | Floor only; the instruction widens it when price history demands. |
-| Min. TVL | **$25,000** | Our exit-impact estimate: a $200 position is 0.8% of a $25k pool, inside the 1% cap. At $10k it would be 2%. |
-| Whitelisted Pools | **see below** | The single highest-leverage field on this screen. |
-| Max Drawdown (24h) | **-35** | Matches the 35% token-drawdown limit; the -50 placeholder tolerates a halving in a day. |
-| Prioritize By | prefer **Fee**, or fees-per-TVL if offered. Avoid **APR** | APR is nomination, not proof — the finding this whole project rests on. Tell me the dropdown options and I will pick precisely. |
+| `version` | `1.0.0-RH-starter` | `1.0.0-RH` |
+| `target_gas_reserve_usd` | 0.5 | 15 |
+| `hard_minimum_gas_reserve_usd` | 0.25 | 10 |
+| `default_new_position_value_usd` | 9.5 | 200 |
+| `minimum_new_position_value_usd` | 5 | 200 |
+| `anti_fragmentation.do_not_open_any_position_below_usd` | 5 | 200 |
+| `harvest_threshold_usd` | 0.1 | 2.0 |
+| `soft_max_single_position_share_of_total_vault_value` | 1.0 | 0.25 |
+| `position_count_policy` | one position | grow while qualified candidates and funds exist |
+| `harvest_policy.realized_eth_use_order` | restore gas, then idle | restore gas, accumulate to $200, fund another position |
+| UI: Max. Value Per Strategy | 100% | 25% |
+| UI: Gas Fee Ceiling | $0.15 | $0.50 |
 
-Multi-window minimums. The important trick: **requiring a 7-day figure implicitly requires 7 days of history**, which enforces the age floor in a way the UI can police.
+A percentage cap sets a floor on vault size, because it must still permit one whole position:
 
-| Field | 1h | 24h | 7d | 30d |
-| --- | --- | --- | --- | --- |
-| Min. APR | **0** | **30** | **20** | **0** |
-| Min. Volume | **0** | **25000** | **175000** | **0** |
-| Min. Fee | **0** | **75** | **525** | **0** |
-
-Why those:
-
-- **1h stays 0 deliberately.** A minimum here would *require* a one-hour spike — the exact false-ignition pattern we reject. Leaving it blank is a decision, not an omission.
-- **APR 24h at 30%, not 70%+.** A higher APR floor pushes selection *toward* memecoins. Our pinned WETH/USDG pools measured roughly 61% gross annualized, so 30% admits sound pools while still excluding dead ones. This is the one place we deliberately go lower than the RAPTOR-X approach.
-- **APR 7d at 20%** is below the 24h figure because a week-long average includes quiet days. Its real job is demanding a week of history.
-- **Volume and Fee 7d are 7× the daily floors**, keeping the windows consistent.
-- **30d stays 0** because Robinhood Chain itself is only about two months old; requiring 30-day figures would exclude nearly everything, including pools that are genuinely fine.
-
-### Whitelisted Pools — the decision that matters most
-
-Left empty, the agent selects from every pool on the chain and the numeric gates above are your only protection. Filled in, it can only touch pools you listed, and your own analysis replaces its pool-picking entirely.
-
-For a first vault, whitelisting the four on-chain-verified WETH/USDG pools from our registry is the conservative option: modest measured yield (net roughly +0.8% to +1.2% over ten days), 100% in-range, contract addresses we verify fail-closed. Leaving it empty is how you find the higher-yield pools, and also how you end up in a two-day-old launch pool. You can widen it later; you cannot un-lose capital.
-
-## Execution Config panel
-
-| Field | Value | Reasoning |
-| --- | --- | --- |
-| Max. Swap Slippage | **0.5%** | Keep the default. A reverted rebalance costs $0.03; a bad fill costs real value. Raise to 1% only if you whitelist volatile pools and see rebalances failing. |
-| Max. Liquidity Slippage | **0.5%** | Same reasoning. |
-| Max. Withdraw Slippage | **0.5%** | This one governs exits. Keeping it tight is what stops a panic unwind at a bad price. |
-| Cool-down Period | **1 hour** | Scan often, act rarely: the instruction limits any single position to one adjustment per day, so a short cooldown costs nothing and lets safety exits happen promptly. Raise it if you observe over-trading. |
-| Max. Value Per Strategy | **25–30%**, but see the arithmetic below | Caps how much of the vault lands in one position; 25% implies at least four. |
-| Gas Fee Ceiling | switch to **$** and set **$0.50** | Measured Robinhood Chain costs: mint $0.020, harvest $0.007, rebalance $0.029. A percentage ceiling of 10% on a $200 position authorizes $20 of gas — roughly 700× the real cost. An absolute $0.50 leaves ample headroom while blocking a genuine gas spike. |
-| Strict Cap | **On** | Enforces the per-strategy cap rather than treating it as advisory. Krystal does not document the exact difference, so this is the cautious reading. |
-| Default Asset | **ETH** | The strategy is ETH-denominated throughout: gas in ETH, harvest to ETH, entries funded from ETH. Matching the denomination avoids conversion drift in the caps. |
-
-### Max Value Per Strategy conflicts with a small vault
-
-The instruction sizes positions near $200. A percentage cap turns that into a minimum vault size:
-
-| Cap | Smallest vault where a $200 position is allowed |
+| Cap | Smallest vault permitting a $200 position |
 | --- | --- |
 | 100% | $200 |
 | 50% | $400 |
 | 30% | $667 |
 | 25% | $800 |
 
-If the vault holds less than the figure in the right column, the cap forbids the position size the instruction asks for, and the agent will either do nothing or quietly pick one of the two to ignore. Resolve it deliberately, one of three ways:
+Below the right-hand figure, the cap forbids the position size the config asks for and the agent will either stall or silently ignore one of the two. Keep the cap and the position size consistent whenever you change either.
 
-1. Fund enough that 25–30% clears $200 (about $700–800), and keep the diversification cap.
-2. Start with the cap at 100% and accept a single position until harvests grow the balance.
-3. Lower the position size in the instruction text to match a smaller vault, remembering that rebalancing at $0.029 is a meaningful drag on a $20 position and trivial on a $200 one.
+## Verifying what Krystal generates
 
-There is no right answer here; it depends on the amount you have decided to risk, which is yours to choose.
+Krystal's agent may still normalize or reinterpret parts of the config. After saving, read back what it stored and check for these specific drifts:
 
-## Your steps — the parts only you can do
+- an age floor below 72 hours, or an "early ignition" style exception that admits new pools anyway
+- ranking or entry driven by APR with no divergence-loss term
+- `compound` enabled, or permission to increase liquidity
+- a fixed range width instead of one derived from price history
+- no exit condition, or conversely an exit on negative PnL alone
+- position sizing without the 1%-of-TVL cap
+- a gas reserve larger than the position it is meant to protect
 
-1. **Fund a fresh wallet** with an amount you would accept losing entirely. Do not use your main wallet. This grants standing authority to an automation contract.
-2. **Create the vault** at defi.krystal.app on Robinhood Chain, with the settings tables above.
-3. **Paste the instruction text** (the 800-character block) into the preferences field, then **read what the agent generates** and check it against the drift list above. If it dropped the age floor or the divergence-loss requirement, restate that clause and regenerate before funding.
-4. **Set permissions** exactly as listed — specifically leave Compound and Increase Liquidity off.
-5. **Review and sign** the vault creation and permission transactions in your own wallet. Read what each one authorizes. I cannot do this step and will not ask you for keys.
-6. **Record the vault address**, then paste your wallet address into the **My positions** panel on our dashboard so you can track it independently of Krystal's own reporting.
-7. **Wait a week before judging it.** Compare our dashboard's `vs holding` figure against the vault's claimed APR. Those two numbers disagreeing is the single most useful signal you will get.
+If a clause was dropped, restate that clause and save again **before funding**.
+
+## Your steps
+
+1. **Fund a fresh wallet** with the amount you have decided to risk. Not your main wallet: this grants standing authority to an automation contract neither of us has audited.
+2. **Create the vault** at defi.krystal.app on Robinhood Chain.
+3. **Paste the starter JSON**, then set every UI field from the table.
+4. **Read back the stored config** and check the drift list above.
+5. **Review and sign** the vault creation and permission transactions in your own wallet. Read what each authorizes. I cannot do this step and will not ask you for keys.
+6. **Paste your wallet address** into the **My positions** panel on our dashboard, so you can measure the vault independently of Krystal's own reporting.
+7. **Wait a week before judging it.** Compare our `vs holding` figure against the vault's claimed APR. Those two numbers disagreeing is the most useful signal you will get.
 8. **Revoke if it disagrees badly.** Delete the orders and withdraw. Standing authority should not outlive your confidence in it.
 
 ## What to expect, honestly
 
-This configuration will earn **less headline APR** than RAPTOR-X. It refuses 1-day-old launch pools, demands 72 hours of history, requires verified contracts, and needs expected fees to beat expected divergence loss with a margin. Those exclusions are exactly where the four-figure APRs come from.
+This configuration will earn **less headline APR** than RAPTOR-X. It refuses pools under 72 hours old, demands verified contracts, requires seven days of history, and needs expected fees to beat expected divergence loss with a margin. Those exclusions are exactly where four-figure APRs come from.
 
-What it aims to produce instead is a number that stays true when you subtract divergence loss and count the positions that did not work. Whether that trade is worth it is your judgement, and the honest answer will only exist after several weeks of `vs holding` data — not before.
+At starter scale it should earn roughly a third of a dollar a month, which is the wrong reason to run it. The right reason is that by the end of a week you will know whether the automation does what it claims, measured against an independent source, having risked almost nothing to find out.
+
+One further caution worth repeating: the same pool measured **net −25.9%** early in this project's analysis and **+367%** a few days later, from the same maths on a different ten-day window. Any figure computed from a short window on a two-month-old chain can invert. Only `vs holding`, accumulated over weeks, settles anything.
