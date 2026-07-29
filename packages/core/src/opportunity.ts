@@ -17,12 +17,19 @@ export const OPPORTUNITY_CRITERIA = Object.freeze({
   minVolume24hUsd: 1_000_000,
   minAgeHours: 24,
   minVolumeToTvl: 0.5,
+  /**
+   * Absolute daily fees the pool must generate. Ratios alone can flatter a tiny
+   * pool whose whole fee take cannot cover gas; this is a floor on the actual
+   * dollars available to split among liquidity providers.
+   */
+  minAbsoluteFees24hUsd: 75,
 })
 
 const MIN_MARKET_CAP_USD = OPPORTUNITY_CRITERIA.minMarketCapUsd
 const MIN_VOLUME_24H_USD = OPPORTUNITY_CRITERIA.minVolume24hUsd
 const MIN_AGE_HOURS = OPPORTUNITY_CRITERIA.minAgeHours
 const MIN_VOLUME_TO_TVL = OPPORTUNITY_CRITERIA.minVolumeToTvl
+const MIN_ABSOLUTE_FEES_24H_USD = OPPORTUNITY_CRITERIA.minAbsoluteFees24hUsd
 
 // Light dust filter (user-selected): only drop near-empty pools.
 const DUST_MIN_VOLUME_24H_USD = 50_000
@@ -37,6 +44,8 @@ export type OpportunityPool = {
   /** Per-token USD prices, when available (used to cross-check our own on-chain price). */
   basePriceUsd?: number | null
   quotePriceUsd?: number | null
+  /** Base (non-quote) token contract address, for contract-safety checks. */
+  baseTokenAddress?: string | null
   createdAt: Date
   marketCapUsd: number | null
   reserveUsd: number
@@ -56,12 +65,15 @@ export type ScoredOpportunity = {
   volume24hUsd: number
   volumeToTvl: number
   estDailyFeeReturnPercent: string
+  /** Absolute dollars of fees the pool generated in 24h. */
+  fees24hUsd: number
   volumeTrend: VolumeTrend
   passesScreen: boolean
   screenNotes: readonly string[]
   transactions24h?: { buys: number; sells: number; buyers: number; sellers: number }
   basePriceUsd?: number | null
   quotePriceUsd?: number | null
+  baseTokenAddress?: string | null
 }
 
 export function scoreOpportunity(pool: OpportunityPool, now = new Date()): ScoredOpportunity {
@@ -88,6 +100,10 @@ export function scoreOpportunity(pool: OpportunityPool, now = new Date()): Score
   if (volumeToTvl < MIN_VOLUME_TO_TVL) {
     screenNotes.push('volume/TVL activity below 0.5')
   }
+  const fees24hUsd = pool.volume24hUsd * (pool.feeTierPercent / 100)
+  if (fees24hUsd < MIN_ABSOLUTE_FEES_24H_USD) {
+    screenNotes.push(`pool fees below $${MIN_ABSOLUTE_FEES_24H_USD}/day in absolute terms`)
+  }
 
   return {
     name: pool.name,
@@ -99,12 +115,14 @@ export function scoreOpportunity(pool: OpportunityPool, now = new Date()): Score
     volume24hUsd: pool.volume24hUsd,
     volumeToTvl,
     estDailyFeeReturnPercent,
+    fees24hUsd,
     volumeTrend,
     passesScreen: screenNotes.length === 0,
     screenNotes,
     ...(pool.transactions24h ? { transactions24h: pool.transactions24h } : {}),
     ...(pool.basePriceUsd != null ? { basePriceUsd: pool.basePriceUsd } : {}),
     ...(pool.quotePriceUsd != null ? { quotePriceUsd: pool.quotePriceUsd } : {}),
+    ...(pool.baseTokenAddress ? { baseTokenAddress: pool.baseTokenAddress } : {}),
   }
 }
 

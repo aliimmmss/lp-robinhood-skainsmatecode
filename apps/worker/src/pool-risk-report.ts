@@ -11,7 +11,7 @@ import {
   type ScoredOpportunity,
   type YieldStability,
 } from '@lp-mine/core'
-import { fetchDailyCandles } from './geckoterminal.js'
+import { fetchDailyCandles, fetchTokenSafety, type BlockscoutTokenSafety } from './geckoterminal.js'
 
 const DEFAULT_RANGE_PERCENT = 10
 const DEFAULT_HISTORY_DAYS = 10
@@ -42,6 +42,8 @@ export type PoolRisk = {
   inRange: InRangeHistory | null
   stability: YieldStability | null
   organic: OrganicVolumeAssessment | null
+  /** Contract-verification signal for the non-quote token. Weak: verified is not safe. */
+  tokenSafety: BlockscoutTokenSafety | null
   warnings: readonly string[]
 }
 
@@ -66,6 +68,7 @@ export function analyzePoolRisk(
   pool: ScoredOpportunity,
   candles: readonly DailyCandle[],
   rangePercent = DEFAULT_RANGE_PERCENT,
+  tokenSafety: BlockscoutTokenSafety | null = null,
 ): PoolRisk {
   const warnings: string[] = []
   const base = {
@@ -84,6 +87,7 @@ export function analyzePoolRisk(
       inRange: null,
       stability: null,
       organic: null,
+      tokenSafety: null,
       warnings: ['insufficient candle history for risk analysis'],
     }
   }
@@ -136,6 +140,7 @@ export function analyzePoolRisk(
     inRange,
     stability,
     organic,
+    tokenSafety,
     warnings,
   }
 }
@@ -169,7 +174,22 @@ export async function buildPoolRiskReport(
         await delay(RATE_LIMIT_BACKOFF_MS)
         candles = await fetchDailyCandles(pool.address, historyDays)
       }
-      analyzed.push(analyzePoolRisk(pool, candles, rangePercent))
+      // Contract check for the non-quote token; a failure here must not lose the
+      // candle analysis we already have.
+      let tokenSafety: BlockscoutTokenSafety | null = null
+      if (pool.baseTokenAddress) {
+        try {
+          tokenSafety = await fetchTokenSafety(pool.baseTokenAddress)
+        } catch {
+          tokenSafety = null
+        }
+      }
+      const risk = analyzePoolRisk(pool, candles, rangePercent, tokenSafety)
+      if (tokenSafety && !tokenSafety.verified) {
+        analyzed.push({ ...risk, warnings: [...risk.warnings, 'token contract is not verified on the explorer'] })
+      } else {
+        analyzed.push(risk)
+      }
     } catch (error: unknown) {
       analyzed.push({
         address: pool.address,
@@ -182,6 +202,7 @@ export async function buildPoolRiskReport(
         inRange: null,
         stability: null,
         organic: null,
+        tokenSafety: null,
         warnings: [`candle fetch failed: ${error instanceof Error ? error.message : String(error)}`],
       })
     }

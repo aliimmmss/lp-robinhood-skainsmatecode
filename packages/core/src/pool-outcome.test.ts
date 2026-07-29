@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { bestTierPerPair, classifyPriceTrend, normalizePairKey, projectPositionOutcome } from './pool-outcome.js'
+import {
+  bestTierPerPair,
+  classifyPriceTrend,
+  estimateExitImpact,
+  normalizePairKey,
+  projectPositionOutcome,
+} from './pool-outcome.js'
 
 describe('classifyPriceTrend', () => {
   it('calls a sustained move in one direction a trend', () => {
@@ -70,6 +76,35 @@ describe('projectPositionOutcome', () => {
     expect(() =>
       projectPositionOutcome({ notionalUsd: 0, medianDailyFeePercent: 1, impermanentLossPercent: 0, days: 1 }),
     ).toThrow(/notional/)
+  })
+})
+
+describe('estimateExitImpact', () => {
+  it('reports the position as a share of pool liquidity', () => {
+    const result = estimateExitImpact({ notionalUsd: 1_000, reserveUsd: 100_000 })
+    expect(result.positionShareOfTvlPercent).toBeCloseTo(1, 6)
+  })
+
+  it('flags a position above the 1% of pool TVL sizing cap', () => {
+    expect(estimateExitImpact({ notionalUsd: 1_000, reserveUsd: 100_000 }).exceedsTvlShareCap).toBe(false)
+    expect(estimateExitImpact({ notionalUsd: 2_000, reserveUsd: 100_000 }).exceedsTvlShareCap).toBe(true)
+  })
+
+  it('estimates exit price impact that grows as the pool gets thinner', () => {
+    const deep = estimateExitImpact({ notionalUsd: 1_000, reserveUsd: 1_000_000 })
+    const thin = estimateExitImpact({ notionalUsd: 1_000, reserveUsd: 20_000 })
+    expect(Number(thin.estimatedExitImpactPercent)).toBeGreaterThan(Number(deep.estimatedExitImpactPercent))
+    expect(Number(deep.estimatedExitImpactPercent)).toBeLessThan(1)
+  })
+
+  it('flags an exit impact beyond the tolerated limit', () => {
+    // a position comparable to the whole pool cannot be exited cleanly
+    expect(estimateExitImpact({ notionalUsd: 50_000, reserveUsd: 60_000 }).exceedsImpactLimit).toBe(true)
+  })
+
+  it('rejects invalid inputs', () => {
+    expect(() => estimateExitImpact({ notionalUsd: 0, reserveUsd: 100 })).toThrow(/notional/)
+    expect(() => estimateExitImpact({ notionalUsd: 100, reserveUsd: 0 })).toThrow(/reserve/)
   })
 })
 

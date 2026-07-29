@@ -78,9 +78,17 @@ export type {
   RangeIlInput,
   YieldStability,
 } from './pool-risk.js'
-export { bestTierPerPair, classifyPriceTrend, normalizePairKey, projectPositionOutcome } from './pool-outcome.js'
+export {
+  SIZING_LIMITS,
+  bestTierPerPair,
+  classifyPriceTrend,
+  estimateExitImpact,
+  normalizePairKey,
+  projectPositionOutcome,
+} from './pool-outcome.js'
 export type {
   BestTier,
+  ExitImpact,
   PositionOutcome,
   PositionOutcomeInput,
   PriceChangeWindows,

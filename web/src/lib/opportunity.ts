@@ -8,6 +8,8 @@ export const CRITERIA = {
   minVolume24hUsd: 1_000_000,
   minAgeHours: 24,
   minVolumeToTvl: 0.5,
+  /** Floor on the actual dollars of fees available to split, not just ratios. */
+  minAbsoluteFees24hUsd: 75,
 }
 const DUST_MIN_VOLUME = 50_000
 const DUST_MIN_RESERVE = 10_000
@@ -33,6 +35,7 @@ export type Opportunity = {
   quotePriceUsd: number | null
   priceTrend: PriceTrend
   priceChange24hPercent: number
+  fees24hUsd: number
 }
 
 export type PriceTrend = 'trending-up' | 'trending-down' | 'ranging'
@@ -127,6 +130,8 @@ function score(pool: RawPool, now: Date): Opportunity {
   if (pool.volume24hUsd < CRITERIA.minVolume24hUsd) screenNotes.push('24h volume below $1M')
   if (ageHours < CRITERIA.minAgeHours) screenNotes.push('pool is newer than 24h')
   if (volumeToTvl < CRITERIA.minVolumeToTvl) screenNotes.push('volume/TVL activity below 0.5')
+  const fees24hUsd = pool.volume24hUsd * (pool.feeTierPercent / 100)
+  if (fees24hUsd < CRITERIA.minAbsoluteFees24hUsd) screenNotes.push('pool fees below $75/day in absolute terms')
 
   return {
     name: pool.name,
@@ -147,6 +152,7 @@ function score(pool: RawPool, now: Date): Opportunity {
     quotePriceUsd: pool.quotePriceUsd,
     priceTrend: classifyTrend(pool.change6h, pool.change24h),
     priceChange24hPercent: pool.change24h,
+    fees24hUsd,
   }
 }
 

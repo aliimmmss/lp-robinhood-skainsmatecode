@@ -15,6 +15,49 @@ type RawPoolAttributes = {
   quote_token_price_usd?: unknown
 }
 
+/** Extracts the "<network>_0xabc" token id GeckoTerminal returns into a bare address. */
+function tokenAddressFromId(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const match = /(0x[0-9a-fA-F]{40})/.exec(value)
+  return match ? match[1]! : null
+}
+
+export type BlockscoutTokenSafety = {
+  address: string
+  verified: boolean
+  isProxy: boolean
+  contractName: string | null
+}
+
+const BLOCKSCOUT_BASE = 'https://robinhoodchain.blockscout.com/api/v2'
+
+/**
+ * Contract-verification signal for a token from Robinhood Chain's explorer.
+ *
+ * This is a weak signal deliberately: a verified contract can still be a
+ * honeypot, and a proxy means an owner can change behaviour later. Unverified is
+ * the meaningful red flag. Real honeypot and transfer-tax detection needs trade
+ * simulation, which this does not do.
+ */
+export async function fetchTokenSafety(
+  address: string,
+  fetchImplementation: typeof fetch = fetch,
+): Promise<BlockscoutTokenSafety> {
+  const response = await fetchImplementation(`${BLOCKSCOUT_BASE}/smart-contracts/${address}`, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(15_000),
+  })
+  if (!response.ok) return { address, verified: false, isProxy: false, contractName: null }
+  const payload: unknown = await response.json()
+  if (!isRecord(payload)) return { address, verified: false, isProxy: false, contractName: null }
+  return {
+    address,
+    verified: payload.is_verified === true,
+    isProxy: typeof payload.proxy_type === 'string' && payload.proxy_type.length > 0,
+    contractName: typeof payload.name === 'string' ? payload.name : null,
+  }
+}
+
 function toFiniteNumber(value: unknown): number | null {
   if (typeof value !== 'string' && typeof value !== 'number') return null
   const parsed = Number(value)
@@ -135,7 +178,13 @@ export async function fetchRobinhoodOpportunityPools(
     for (const entry of data) {
       if (isRecord(entry) && isRecord(entry.attributes)) {
         const normalized = normalizeGeckoPool(entry.attributes as RawPoolAttributes)
-        if (normalized) pools.push(normalized)
+        if (!normalized) continue
+        // Token address lives in relationships, not attributes.
+        const relationships = isRecord(entry.relationships) ? entry.relationships : undefined
+        const baseToken = isRecord(relationships?.base_token) ? relationships.base_token : undefined
+        const baseData = isRecord(baseToken?.data) ? baseToken.data : undefined
+        const baseTokenAddress = tokenAddressFromId(baseData?.id)
+        pools.push(baseTokenAddress ? { ...normalized, baseTokenAddress } : normalized)
       }
     }
   }

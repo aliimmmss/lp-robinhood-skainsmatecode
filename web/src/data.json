@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-26T21:00:43.999Z",
+  "generatedAt": "2026-07-29T20:56:57.335Z",
   "health": {
     "mode": "read-only",
-    "generatedAt": "2026-07-26T21:00:43.999Z",
+    "generatedAt": "2026-07-29T20:56:57.335Z",
     "status": "critical",
     "source": {
       "databasePath": "./data/robinhood-univ3.sqlite",
-      "historyGeneratedAt": "2026-07-26T21:00:43.999Z"
+      "historyGeneratedAt": "2026-07-29T20:56:57.335Z"
     },
     "maximumObservationAgeSeconds": 900,
     "summary": {
@@ -28,7 +28,7 @@
           "source-warning": 0
         }
       },
-      "oldestObservationAgeSeconds": 304563
+      "oldestObservationAgeSeconds": 563537
     },
     "pools": [
       {
@@ -36,7 +36,7 @@
         "feeTier": 100,
         "status": "degraded",
         "lastObservedAt": "2026-07-23T08:24:40.000Z",
-        "ageSeconds": 304563,
+        "ageSeconds": 563537,
         "observationCount": 3,
         "coveragePercent": "25.00%",
         "riskFlags": [
@@ -49,7 +49,7 @@
         "feeTier": 500,
         "status": "degraded",
         "lastObservedAt": "2026-07-23T08:24:40.000Z",
-        "ageSeconds": 304563,
+        "ageSeconds": 563537,
         "observationCount": 3,
         "coveragePercent": "25.00%",
         "riskFlags": [
@@ -62,7 +62,7 @@
         "feeTier": 3000,
         "status": "degraded",
         "lastObservedAt": "2026-07-23T08:24:40.000Z",
-        "ageSeconds": 304563,
+        "ageSeconds": 563537,
         "observationCount": 3,
         "coveragePercent": "25.00%",
         "riskFlags": [
@@ -75,7 +75,7 @@
         "feeTier": 10000,
         "status": "critical",
         "lastObservedAt": "2026-07-23T08:24:40.000Z",
-        "ageSeconds": 304563,
+        "ageSeconds": 563537,
         "observationCount": 3,
         "coveragePercent": "25.00%",
         "riskFlags": [
@@ -110,7 +110,7 @@
         "code": "stale-observation",
         "poolAddress": "0x52e65B17fB6E5BA00Ed806f37Afcd2DaA50271Ca",
         "feeTier": 100,
-        "message": "Latest observation age 304563s exceeds the 900s threshold.",
+        "message": "Latest observation age 563537s exceeds the 900s threshold.",
         "observedAt": "2026-07-23T08:24:40.000Z"
       },
       {
@@ -128,7 +128,7 @@
         "code": "stale-observation",
         "poolAddress": "0x69BfaF19C9f377BB306a89aEd9F6B07e2c1a8d9a",
         "feeTier": 500,
-        "message": "Latest observation age 304563s exceeds the 900s threshold.",
+        "message": "Latest observation age 563537s exceeds the 900s threshold.",
         "observedAt": "2026-07-23T08:24:40.000Z"
       },
       {
@@ -146,7 +146,7 @@
         "code": "stale-observation",
         "poolAddress": "0xa9188730Fe85Be88ad499D7d52B099e800fB0334",
         "feeTier": 3000,
-        "message": "Latest observation age 304563s exceeds the 900s threshold.",
+        "message": "Latest observation age 563537s exceeds the 900s threshold.",
         "observedAt": "2026-07-23T08:24:40.000Z"
       },
       {
@@ -164,7 +164,7 @@
         "code": "stale-observation",
         "poolAddress": "0x5f009E071F07e92B6C624e83F52F17bBDa34680D",
         "feeTier": 10000,
-        "message": "Latest observation age 304563s exceeds the 900s threshold.",
+        "message": "Latest observation age 563537s exceeds the 900s threshold.",
         "observedAt": "2026-07-23T08:24:40.000Z"
       }
     ],
@@ -173,7 +173,7 @@
   "fees": {
     "mode": "read-only",
     "databasePath": "./data/robinhood-univ3.sqlite",
-    "generatedAt": "2026-07-26T21:00:43.999Z",
+    "generatedAt": "2026-07-29T20:56:57.335Z",
     "configuredWindowSeconds": 86400,
     "referenceLiquidity": "1000000000000000000",
     "pools": [
@@ -433,225 +433,411 @@
     "mode": "read-only",
     "source": "geckoterminal",
     "network": "robinhood",
-    "generatedAt": "2026-07-26T21:00:43.999Z",
+    "generatedAt": "2026-07-29T20:56:57.335Z",
     "criteria": {
       "minMarketCapUsd": 250000,
       "minVolume24hUsd": 1000000,
       "minAgeHours": 24,
-      "minVolumeToTvl": 0.5
+      "minVolumeToTvl": 0.5,
+      "minAbsoluteFees24hUsd": 75
     },
-    "count": 35,
+    "count": 33,
     "opportunities": [
       {
-        "name": "PONS / USDG 0.3%",
-        "address": "0x4be9657ec9002e528f4f17a5c43edc525a07f888f7b180c2afbf75e096c4f38a",
-        "feeTierPercent": 0.3,
-        "ageHours": 211.30861083333335,
-        "marketCapUsd": 38618548.3864227,
-        "reserveUsd": 371824.1012,
-        "volume24hUsd": 2577477.03929559,
-        "volumeToTvl": 6.931979478945057,
-        "estDailyFeeReturnPercent": "2.08",
+        "name": "PIPEDOG / WETH 1%",
+        "address": "0xb7f10f74b39291b9290b779978e19a7637c742d6",
+        "feeTierPercent": 1,
+        "ageHours": 24.41814861111111,
+        "marketCapUsd": 40368320.3879357,
+        "reserveUsd": 10371212.0919,
+        "volume24hUsd": 79228077.8480151,
+        "volumeToTvl": 7.639230318112274,
+        "estDailyFeeReturnPercent": "7.64",
+        "fees24hUsd": 792280.778480151,
         "volumeTrend": "fading",
         "passesScreen": true,
         "screenNotes": [],
         "transactions24h": {
-          "buys": 4831,
-          "sells": 5008,
-          "buyers": 1140,
-          "sellers": 1345
+          "buys": 35876,
+          "sells": 22947,
+          "buyers": 5133,
+          "sellers": 4303
         },
-        "basePriceUsd": 0.0492348319409195,
-        "quotePriceUsd": 0.999928738582665
+        "basePriceUsd": 0.00325098417528804,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x5cb6f181081301b44905f3ae15419112ecabd8a6"
+      },
+      {
+        "name": "CASHCAT / WETH 0.3%",
+        "address": "0xd42a491087a15e5afd51feb3606066cc152d2b09",
+        "feeTierPercent": 0.3,
+        "ageHours": 673.3042597222222,
+        "marketCapUsd": 36910963.3438088,
+        "reserveUsd": 181639.074,
+        "volume24hUsd": 2632293.08745023,
+        "volumeToTvl": 14.491887838242503,
+        "estDailyFeeReturnPercent": "4.35",
+        "fees24hUsd": 7896.879262350691,
+        "volumeTrend": "fading",
+        "passesScreen": true,
+        "screenNotes": [],
+        "transactions24h": {
+          "buys": 6811,
+          "sells": 6765,
+          "buyers": 1371,
+          "sellers": 1471
+        },
+        "basePriceUsd": 0.0373157460680656,
+        "quotePriceUsd": 1887.32,
+        "baseTokenAddress": "0x020bfc650a365f8bb26819deaabf3e21291018b4"
+      },
+      {
+        "name": "PONS / WETH 1%",
+        "address": "0x10cc6bd38112cac182db90b6a71d8bb5939526ba",
+        "feeTierPercent": 1,
+        "ageHours": 384.2434263888889,
+        "marketCapUsd": 30361630.8059248,
+        "reserveUsd": 1567815.9558,
+        "volume24hUsd": 6161326.11608184,
+        "volumeToTvl": 3.9298784358511885,
+        "estDailyFeeReturnPercent": "3.93",
+        "fees24hUsd": 61613.2611608184,
+        "volumeTrend": "fading",
+        "passesScreen": true,
+        "screenNotes": [],
+        "transactions24h": {
+          "buys": 4471,
+          "sells": 2987,
+          "buyers": 1587,
+          "sellers": 1484
+        },
+        "basePriceUsd": 0.0392771126590044,
+        "quotePriceUsd": 1886.45,
+        "baseTokenAddress": "0x39dbed3a2bd333467115de45665cc57f813c4571"
+      },
+      {
+        "name": "CASHCAT / WETH 0.29%",
+        "address": "0x1252fbfc4f6530a025ca351494245797b2a147b7b5d2dc8af7893e4e1a2e9df3",
+        "feeTierPercent": 0.29,
+        "ageHours": 53.13064861111111,
+        "marketCapUsd": 36747444.0372248,
+        "reserveUsd": 212636.3052,
+        "volume24hUsd": 2739087.61051391,
+        "volumeToTvl": 12.881561349260645,
+        "estDailyFeeReturnPercent": "3.74",
+        "fees24hUsd": 7943.354070490339,
+        "volumeTrend": "fading",
+        "passesScreen": true,
+        "screenNotes": [],
+        "transactions24h": {
+          "buys": 4061,
+          "sells": 3990,
+          "buyers": 723,
+          "sellers": 793
+        },
+        "basePriceUsd": 0.0371302517806147,
+        "quotePriceUsd": 1887.32,
+        "baseTokenAddress": "0x020bfc650a365f8bb26819deaabf3e21291018b4"
       },
       {
         "name": "CASHCAT / USDG 0.269%",
         "address": "0xa92a3df27a00a276183ff7265fd8affa11df1fe8bb23ddfaf13f6c879a3f818b",
         "feeTierPercent": 0.269,
-        "ageHours": 271.3580552777778,
-        "marketCapUsd": 41291771.8618951,
-        "reserveUsd": 798251.8755,
-        "volume24hUsd": 2774637.79875975,
-        "volumeToTvl": 3.4758926147487017,
-        "estDailyFeeReturnPercent": "0.94",
+        "ageHours": 343.2950930555556,
+        "marketCapUsd": 36767986.9364665,
+        "reserveUsd": 377193.0365,
+        "volume24hUsd": 4758294.32869433,
+        "volumeToTvl": 12.615011063955127,
+        "estDailyFeeReturnPercent": "3.39",
+        "fees24hUsd": 12799.811744187748,
+        "volumeTrend": "fading",
+        "passesScreen": true,
+        "screenNotes": [],
+        "transactions24h": {
+          "buys": 6944,
+          "sells": 7127,
+          "buyers": 1010,
+          "sellers": 1055
+        },
+        "basePriceUsd": 0.0371510086828455,
+        "quotePriceUsd": 1.00063629802491,
+        "baseTokenAddress": "0x020bfc650a365f8bb26819deaabf3e21291018b4"
+      },
+      {
+        "name": "PONS / USDG 0.3%",
+        "address": "0x4be9657ec9002e528f4f17a5c43edc525a07f888f7b180c2afbf75e096c4f38a",
+        "feeTierPercent": 0.3,
+        "ageHours": 283.2456486111111,
+        "marketCapUsd": 30052696.7222989,
+        "reserveUsd": 313167.6693,
+        "volume24hUsd": 3384582.27417515,
+        "volumeToTvl": 10.807572447502166,
+        "estDailyFeeReturnPercent": "3.24",
+        "fees24hUsd": 10153.74682252545,
+        "volumeTrend": "fading",
+        "passesScreen": true,
+        "screenNotes": [],
+        "transactions24h": {
+          "buys": 6529,
+          "sells": 5144,
+          "buyers": 1763,
+          "sellers": 1697
+        },
+        "basePriceUsd": 0.0388774622299804,
+        "quotePriceUsd": 1.00036434543862,
+        "baseTokenAddress": "0x39dbed3a2bd333467115de45665cc57f813c4571"
+      },
+      {
+        "name": "CASHCAT / WETH 1%",
+        "address": "0xa70fc67c9f69da90b63a0e4c05d229954574e313",
+        "feeTierPercent": 1,
+        "ageHours": 733.9356486111111,
+        "marketCapUsd": 36926434.0513985,
+        "reserveUsd": 3051896.3779,
+        "volume24hUsd": 8418371.59897073,
+        "volumeToTvl": 2.7584067597876256,
+        "estDailyFeeReturnPercent": "2.76",
+        "fees24hUsd": 84183.7159897073,
+        "volumeTrend": "fading",
+        "passesScreen": true,
+        "screenNotes": [],
+        "transactions24h": {
+          "buys": 5543,
+          "sells": 4530,
+          "buyers": 1292,
+          "sellers": 1257
+        },
+        "basePriceUsd": 0.0373111063778245,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x020bfc650a365f8bb26819deaabf3e21291018b4"
+      },
+      {
+        "name": "STONKBROKER / WETH 1%",
+        "address": "0xd33c8fd38b06e989cdbd4dffdefab71c4bdd415b24964c8d69e38ff35b068f92",
+        "feeTierPercent": 1,
+        "ageHours": 281.1150930555556,
+        "marketCapUsd": 13657597.8882926,
+        "reserveUsd": 2780600.6942,
+        "volume24hUsd": 3589634.04018606,
+        "volumeToTvl": 1.2909563202201622,
+        "estDailyFeeReturnPercent": "1.29",
+        "fees24hUsd": 35896.3404018606,
         "volumeTrend": "steady",
         "passesScreen": true,
         "screenNotes": [],
         "transactions24h": {
-          "buys": 3954,
-          "sells": 3440,
-          "buyers": 661,
-          "sellers": 743
+          "buys": 4030,
+          "sells": 2553,
+          "buyers": 1017,
+          "sellers": 1114
         },
-        "basePriceUsd": 0.041700746045277,
-        "quotePriceUsd": 1.00043961343286
+        "basePriceUsd": 0.00886036284356322,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0xe934e36a439c94017b64a3fece66af12099abf50"
+      },
+      {
+        "name": "spacex / USDG 0.05%",
+        "address": "0xc61284332117c3fb23a2a56cceffd07f7af60029",
+        "feeTierPercent": 0.05,
+        "ageHours": 153.00648194444443,
+        "marketCapUsd": 1814036.83620875,
+        "reserveUsd": 99276.367,
+        "volume24hUsd": 1790608.16505883,
+        "volumeToTvl": 18.036600443475436,
+        "estDailyFeeReturnPercent": "0.90",
+        "fees24hUsd": 895.304082529415,
+        "volumeTrend": "rising",
+        "passesScreen": true,
+        "screenNotes": [],
+        "transactions24h": {
+          "buys": 3682,
+          "sells": 4247,
+          "buyers": 587,
+          "sellers": 1104
+        },
+        "basePriceUsd": 112.258262786596,
+        "quotePriceUsd": 1.00036820721469,
+        "baseTokenAddress": "0x4a0e65a3eccec6dbe60ae065f2e7bb85fae35eea"
       },
       {
         "name": "VIRTUAL / WETH 0.05%",
         "address": "0x9cc8c4f6118419a27f113723f1dea646685be55f",
         "feeTierPercent": 0.05,
-        "ageHours": 540.1688886111111,
-        "marketCapUsd": 387033666.660696,
-        "reserveUsd": 328254.5838,
-        "volume24hUsd": 2219882.73943012,
-        "volumeToTvl": 6.7626861862275085,
-        "estDailyFeeReturnPercent": "0.34",
-        "volumeTrend": "steady",
+        "ageHours": 612.1059263888889,
+        "marketCapUsd": 362442332.58119,
+        "reserveUsd": 232013.6098,
+        "volume24hUsd": 2552334.30209179,
+        "volumeToTvl": 11.000795618377513,
+        "estDailyFeeReturnPercent": "0.55",
+        "fees24hUsd": 1276.167151045895,
+        "volumeTrend": "rising",
         "passesScreen": true,
         "screenNotes": [],
         "transactions24h": {
-          "buys": 4379,
-          "sells": 4150,
-          "buyers": 1408,
-          "sellers": 1457
+          "buys": 6124,
+          "sells": 5586,
+          "buyers": 1901,
+          "sellers": 1685
         },
-        "basePriceUsd": 0.588631539066717,
-        "quotePriceUsd": 1912.15
+        "basePriceUsd": 0.550974885715815,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0xc6911796042b15d7fa4f6cde69e245ddcd3d9c31"
       },
       {
-        "name": "gme / USDG 0.05%",
-        "address": "0xe2b46c905e12ab8e2f864e4821a4325884c1b126",
+        "name": "USDG / WETH 0.05%",
+        "address": "0xfcfae8fa0bd6da961bcf5d990f27690932deac4f093e99bf3e871691c6586593",
         "feeTierPercent": 0.05,
-        "ageHours": 72.55749972222222,
-        "marketCapUsd": 1411635.71197317,
-        "reserveUsd": 460854.9201,
-        "volume24hUsd": 2108019.75718374,
-        "volumeToTvl": 4.574150486939198,
-        "estDailyFeeReturnPercent": "0.23",
-        "volumeTrend": "steady",
+        "ageHours": 388.95231527777776,
+        "marketCapUsd": 3316614033.76861,
+        "reserveUsd": 250422.8544,
+        "volume24hUsd": 1596975.48168495,
+        "volumeToTvl": 6.37711556124228,
+        "estDailyFeeReturnPercent": "0.32",
+        "fees24hUsd": 798.487740842475,
+        "volumeTrend": "rising",
         "passesScreen": true,
         "screenNotes": [],
         "transactions24h": {
-          "buys": 6142,
-          "sells": 5074,
-          "buyers": 1845,
-          "sellers": 2138
+          "buys": 3007,
+          "sells": 2782,
+          "buyers": 941,
+          "sellers": 740
         },
-        "basePriceUsd": 21.1764230282655,
-        "quotePriceUsd": 1.00035826348216
+        "basePriceUsd": 1.00236526178638,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x5fc5360d0400a0fd4f2af552add042d716f1d168"
       },
       {
         "name": "nvda / USDG 0.05%",
         "address": "0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3",
         "feeTierPercent": 0.05,
-        "ageHours": 129.97722194444444,
-        "marketCapUsd": 4197346.38993651,
-        "reserveUsd": 1283633.1787,
-        "volume24hUsd": 4267139.52814826,
-        "volumeToTvl": 3.3242670873230367,
-        "estDailyFeeReturnPercent": "0.17",
-        "volumeTrend": "rising",
+        "ageHours": 201.91425972222223,
+        "marketCapUsd": 5514925.62087251,
+        "reserveUsd": 1407805.569,
+        "volume24hUsd": 8564953.11114787,
+        "volumeToTvl": 6.083903416600187,
+        "estDailyFeeReturnPercent": "0.30",
+        "fees24hUsd": 4282.476555573935,
+        "volumeTrend": "steady",
         "passesScreen": true,
         "screenNotes": [],
         "transactions24h": {
-          "buys": 10047,
-          "sells": 8680,
-          "buyers": 3037,
-          "sellers": 3386
+          "buys": 6693,
+          "sells": 6922,
+          "buyers": 1094,
+          "sellers": 1536
         },
-        "basePriceUsd": 214.459404907215,
-        "quotePriceUsd": 1.02987518505133
+        "basePriceUsd": 190.036973832871,
+        "quotePriceUsd": 1.00018715357758,
+        "baseTokenAddress": "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec"
       },
       {
         "name": "USDG / WETH 0.02%",
         "address": "0x84bd4e2d8be11aeb0afc1195b38f587b61e90068548f1063fdbe448fb8cad0b6",
         "feeTierPercent": 0.02,
-        "ageHours": 246.38222194444444,
-        "marketCapUsd": 3277895530.75474,
-        "reserveUsd": 622585.5284,
-        "volume24hUsd": 4560144.89619612,
-        "volumeToTvl": 7.324527616174062,
-        "estDailyFeeReturnPercent": "0.15",
+        "ageHours": 318.3192597222222,
+        "marketCapUsd": 3311698414.77553,
+        "reserveUsd": 750073.1689,
+        "volume24hUsd": 10268278.1208207,
+        "volumeToTvl": 13.68970194718386,
+        "estDailyFeeReturnPercent": "0.27",
+        "fees24hUsd": 2053.65562416414,
         "volumeTrend": "rising",
         "passesScreen": true,
         "screenNotes": [],
         "transactions24h": {
-          "buys": 8316,
-          "sells": 9463,
-          "buyers": 2463,
-          "sellers": 2319
+          "buys": 10091,
+          "sells": 10338,
+          "buyers": 1936,
+          "sellers": 1705
         },
-        "basePriceUsd": 0.999652055072502,
-        "quotePriceUsd": 1912.15
+        "basePriceUsd": 1.00168279057723,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x5fc5360d0400a0fd4f2af552add042d716f1d168"
       },
       {
         "name": "USDG / WETH 0.01%",
         "address": "0x52e65b17fb6e5ba00ed806f37afcd2daa50271ca",
         "feeTierPercent": 0.01,
-        "ageHours": 576.1599997222222,
-        "marketCapUsd": 3279153260.60268,
-        "reserveUsd": 5895048.9275,
-        "volume24hUsd": 54284113.1703377,
-        "volumeToTvl": 9.208424533527792,
-        "estDailyFeeReturnPercent": "0.09",
+        "ageHours": 648.0970375,
+        "marketCapUsd": 3311713264.28468,
+        "reserveUsd": 6137699.1541,
+        "volume24hUsd": 146366549.210701,
+        "volumeToTvl": 23.84713644899453,
+        "estDailyFeeReturnPercent": "0.24",
+        "fees24hUsd": 14636.6549210701,
         "volumeTrend": "rising",
         "passesScreen": true,
         "screenNotes": [],
         "transactions24h": {
-          "buys": 102029,
-          "sells": 114855,
-          "buyers": 10837,
-          "sellers": 11161
+          "buys": 95946,
+          "sells": 104533,
+          "buyers": 10670,
+          "sellers": 10353
         },
-        "basePriceUsd": 1.00003562195385,
-        "quotePriceUsd": 1912.15
+        "basePriceUsd": 1.00148698340185,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x5fc5360d0400a0fd4f2af552add042d716f1d168"
+      },
+      {
+        "name": "USDG / WETH 0.045%",
+        "address": "0x6ba18d461bfe3df70a80b50a4700e330e49efdaf597901b931f210554a5035d2",
+        "feeTierPercent": 0.045,
+        "ageHours": 348.27759305555554,
+        "marketCapUsd": 3316661841.45211,
+        "reserveUsd": 519363.0079,
+        "volume24hUsd": 2302401.37233363,
+        "volumeToTvl": 4.433125458132248,
+        "estDailyFeeReturnPercent": "0.20",
+        "fees24hUsd": 1036.0806175501334,
+        "volumeTrend": "rising",
+        "passesScreen": true,
+        "screenNotes": [],
+        "transactions24h": {
+          "buys": 3215,
+          "sells": 3114,
+          "buyers": 786,
+          "sellers": 633
+        },
+        "basePriceUsd": 1.00237971052626,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x5fc5360d0400a0fd4f2af552add042d716f1d168"
       },
       {
         "name": "USDG / WETH 0.05%",
         "address": "0x69bfaf19c9f377bb306a89aed9f6b07e2c1a8d9a",
         "feeTierPercent": 0.05,
-        "ageHours": 659.4386108333333,
-        "marketCapUsd": 3278497482.82306,
-        "reserveUsd": 2362026.8082,
-        "volume24hUsd": 3591092.29024928,
-        "volumeToTvl": 1.5203435785667052,
-        "estDailyFeeReturnPercent": "0.08",
+        "ageHours": 731.3756486111112,
+        "marketCapUsd": 3311682241.08948,
+        "reserveUsd": 2175537.5295,
+        "volume24hUsd": 8126987.36002473,
+        "volumeToTvl": 3.7356226908632277,
+        "estDailyFeeReturnPercent": "0.19",
+        "fees24hUsd": 4063.493680012365,
         "volumeTrend": "rising",
         "passesScreen": true,
         "screenNotes": [],
         "transactions24h": {
-          "buys": 7104,
-          "sells": 7896,
-          "buyers": 1656,
-          "sellers": 1607
+          "buys": 9794,
+          "sells": 9656,
+          "buyers": 1691,
+          "sellers": 1465
         },
-        "basePriceUsd": 0.999835631045286,
-        "quotePriceUsd": 1912.15
+        "basePriceUsd": 1.00176651072849,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x5fc5360d0400a0fd4f2af552add042d716f1d168"
       },
       {
-        "name": "富贵 / WETH 1%",
-        "address": "0x5b9abf169d6fbb3a6dbc85e1987628f2a54ae1fe",
+        "name": "PIPECAT / WETH 1%",
+        "address": "0x430910f9c3dc33b92b977a2ee16d3b02f555282d",
         "feeTierPercent": 1,
-        "ageHours": 273.85083305555554,
+        "ageHours": 22.7620375,
         "marketCapUsd": null,
-        "reserveUsd": 42267.5319,
-        "volume24hUsd": 4233455.42583982,
-        "volumeToTvl": 100.15856700257957,
-        "estDailyFeeReturnPercent": "100.16",
-        "volumeTrend": "rising",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000"
-        ],
-        "transactions24h": {
-          "buys": 18336,
-          "sells": 15457,
-          "buyers": 2796,
-          "sellers": 2626
-        },
-        "basePriceUsd": 0.000176718243368272,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "NUMI / WETH 1%",
-        "address": "0x6f69debf5551e7ecd55cc985a2b16b525d169dc4",
-        "feeTierPercent": 1,
-        "ageHours": 20.331110833333334,
-        "marketCapUsd": null,
-        "reserveUsd": 12391.6817,
-        "volume24hUsd": 1144216.52797363,
-        "volumeToTvl": 92.33746925355823,
-        "estDailyFeeReturnPercent": "92.34",
+        "reserveUsd": 41558.7855,
+        "volume24hUsd": 6970007.9655204,
+        "volumeToTvl": 167.7144286499999,
+        "estDailyFeeReturnPercent": "167.71",
+        "fees24hUsd": 69700.079655204,
         "volumeTrend": "fading",
         "passesScreen": false,
         "screenNotes": [
@@ -659,172 +845,52 @@
           "pool is newer than 24h"
         ],
         "transactions24h": {
-          "buys": 6914,
-          "sells": 5368,
-          "buyers": 2051,
-          "sellers": 1970
+          "buys": 28207,
+          "sells": 23395,
+          "buyers": 4117,
+          "sellers": 3854
         },
-        "basePriceUsd": 0.0000208144604587164,
-        "quotePriceUsd": 1912.04
+        "basePriceUsd": 0.000107046968550577,
+        "quotePriceUsd": 1886.45,
+        "baseTokenAddress": "0x9d98f99b0b6b2b7f99ab8bc187e1c59793eccb2c"
       },
       {
-        "name": "Andy / WETH 1%",
-        "address": "0x08c792279a59a96b2e20012ee606689983266bbf",
+        "name": "PIPECAT / WETH 1%",
+        "address": "0x4d1f0b859ff841152079da8239f9805c6e2e767f",
         "feeTierPercent": 1,
-        "ageHours": 21.511666388888887,
+        "ageHours": 24.330370833333333,
         "marketCapUsd": null,
-        "reserveUsd": 15804.6582,
-        "volume24hUsd": 1352954.66105696,
-        "volumeToTvl": 85.60480359245985,
-        "estDailyFeeReturnPercent": "85.60",
-        "volumeTrend": "fading",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 9126,
-          "sells": 6823,
-          "buyers": 1355,
-          "sellers": 1199
-        },
-        "basePriceUsd": 0.0000315065544076414,
-        "quotePriceUsd": 1912.98
-      },
-      {
-        "name": "FRANKLIN / WETH 1%",
-        "address": "0xe10362637d770d144a6f33e0460119e398fab9ab",
-        "feeTierPercent": 1,
-        "ageHours": 276.7216663888889,
-        "marketCapUsd": null,
-        "reserveUsd": 14050.8028,
-        "volume24hUsd": 1090997.95673073,
-        "volumeToTvl": 77.64666348678169,
-        "estDailyFeeReturnPercent": "77.65",
+        "reserveUsd": 10271.2899,
+        "volume24hUsd": 1647350.64391623,
+        "volumeToTvl": 160.38400823602788,
+        "estDailyFeeReturnPercent": "160.38",
+        "fees24hUsd": 16473.5064391623,
         "volumeTrend": "fading",
         "passesScreen": false,
         "screenNotes": [
           "market cap below $250,000"
         ],
         "transactions24h": {
-          "buys": 6125,
-          "sells": 4903,
-          "buyers": 1055,
-          "sellers": 971
+          "buys": 8346,
+          "sells": 7955,
+          "buyers": 1912,
+          "sellers": 1826
         },
-        "basePriceUsd": 0.000026930077327426,
-        "quotePriceUsd": 1912.2
+        "basePriceUsd": 0.0000146250440235378,
+        "quotePriceUsd": 1885.11,
+        "baseTokenAddress": "0x5d43cb7556a3c06e63e014232cb9ed298932cb9b"
       },
       {
-        "name": "TA / WETH 1%",
-        "address": "0x9b64026574395b1cfaa68458761b9f492a266be6",
+        "name": "PIPECAT / WETH 1%",
+        "address": "0xdb19277144b6790a06ab81e4e5951a85f17e43e0",
         "feeTierPercent": 1,
-        "ageHours": 24.795555277777776,
+        "ageHours": 22.740093055555555,
         "marketCapUsd": null,
-        "reserveUsd": 164341.9297,
-        "volume24hUsd": 10824854.5624959,
-        "volumeToTvl": 65.86788035321396,
-        "estDailyFeeReturnPercent": "65.87",
-        "volumeTrend": "steady",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000"
-        ],
-        "transactions24h": {
-          "buys": 37050,
-          "sells": 31141,
-          "buyers": 3347,
-          "sellers": 3522
-        },
-        "basePriceUsd": 0.00095102503774751,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "HFUND / WETH 1%",
-        "address": "0x8520746174e7344e2dc97681830a728442a28514",
-        "feeTierPercent": 1,
-        "ageHours": 4.396110833333333,
-        "marketCapUsd": null,
-        "reserveUsd": 27248.0888,
-        "volume24hUsd": 1490614.82857629,
-        "volumeToTvl": 54.70529839789314,
-        "estDailyFeeReturnPercent": "54.71",
-        "volumeTrend": "rising",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 16603,
-          "sells": 7042,
-          "buyers": 2531,
-          "sellers": 450
-        },
-        "basePriceUsd": 0.0000645149626378669,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "PCAT / WETH 1%",
-        "address": "0xe27dade960cfa82c2bfe0c661cbb498cc4dd233e",
-        "feeTierPercent": 1,
-        "ageHours": 10.563055277777778,
-        "marketCapUsd": null,
-        "reserveUsd": 22185.454,
-        "volume24hUsd": 1055310.32197887,
-        "volumeToTvl": 47.567668526362816,
-        "estDailyFeeReturnPercent": "47.57",
-        "volumeTrend": "rising",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 6493,
-          "sells": 5710,
-          "buyers": 1339,
-          "sellers": 1287
-        },
-        "basePriceUsd": 0.0000567971989369048,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "CATE / WETH 1%",
-        "address": "0xc61e15c97b1282826cfb92f84faf4c41b3bab5b0",
-        "feeTierPercent": 1,
-        "ageHours": 4.601388611111111,
-        "marketCapUsd": null,
-        "reserveUsd": 131848.786,
-        "volume24hUsd": 5846960.94575837,
-        "volumeToTvl": 44.34595966441716,
-        "estDailyFeeReturnPercent": "44.35",
-        "volumeTrend": "rising",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 22647,
-          "sells": 19228,
-          "buyers": 2776,
-          "sellers": 2560
-        },
-        "basePriceUsd": 0.00121701083700085,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "SalaryCat / WETH 1%",
-        "address": "0x91e418f8b26f94b23cca7080a8362561d1859441",
-        "feeTierPercent": 1,
-        "ageHours": 12.196110833333334,
-        "marketCapUsd": null,
-        "reserveUsd": 11134.332,
-        "volume24hUsd": 434265.005396209,
-        "volumeToTvl": 39.00234027476538,
-        "estDailyFeeReturnPercent": "39.00",
+        "reserveUsd": 10372.9682,
+        "volume24hUsd": 859345.236145893,
+        "volumeToTvl": 82.84468047881349,
+        "estDailyFeeReturnPercent": "82.84",
+        "fees24hUsd": 8593.45236145893,
         "volumeTrend": "fading",
         "passesScreen": false,
         "screenNotes": [
@@ -833,460 +899,392 @@
           "pool is newer than 24h"
         ],
         "transactions24h": {
-          "buys": 3797,
-          "sells": 3272,
-          "buyers": 1270,
-          "sellers": 1213
+          "buys": 6982,
+          "sells": 4409,
+          "buyers": 2757,
+          "sellers": 2658
         },
-        "basePriceUsd": 0.0000180768847974611,
-        "quotePriceUsd": 1911.9
+        "basePriceUsd": 0.0000160654401118471,
+        "quotePriceUsd": 1886.15,
+        "baseTokenAddress": "0x23bf453f157ba797aa0787e6f0e62655138fa4e9"
       },
       {
-        "name": "TA / USDG 3.002%",
-        "address": "0xe5f421338382cc6bbdad8db839a1bbbceee3129d54914eb3ec0e402be14f5fc0",
-        "feeTierPercent": 3.002,
-        "ageHours": 24.024721944444444,
+        "name": "NASDANQ / WETH 1%",
+        "address": "0x9df64b59b2a5dbbf3a1dbdfc8a390bddbfe33818",
+        "feeTierPercent": 1,
+        "ageHours": 10.239259722222222,
         "marketCapUsd": null,
-        "reserveUsd": 41507.3132,
-        "volume24hUsd": 516852.038353248,
-        "volumeToTvl": 12.45207165934431,
-        "estDailyFeeReturnPercent": "37.38",
+        "reserveUsd": 10966.5173,
+        "volume24hUsd": 758255.708540509,
+        "volumeToTvl": 69.14279965076142,
+        "estDailyFeeReturnPercent": "69.14",
+        "fees24hUsd": 7582.55708540509,
+        "volumeTrend": "fading",
+        "passesScreen": false,
+        "screenNotes": [
+          "market cap below $250,000",
+          "24h volume below $1,000,000",
+          "pool is newer than 24h"
+        ],
+        "transactions24h": {
+          "buys": 5338,
+          "sells": 5361,
+          "buyers": 1387,
+          "sellers": 1278
+        },
+        "basePriceUsd": 0.000019369081935022,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x142af8469a6b00c2e9be169992381b9f59ffdd06"
+      },
+      {
+        "name": "MarketCat / WETH 1%",
+        "address": "0x166056166dba42afa2985e76d08e6227a86918cc",
+        "feeTierPercent": 1,
+        "ageHours": 14.919259722222222,
+        "marketCapUsd": null,
+        "reserveUsd": 46778.9965,
+        "volume24hUsd": 1979365.69113896,
+        "volumeToTvl": 42.31312852422903,
+        "estDailyFeeReturnPercent": "42.31",
+        "fees24hUsd": 19793.6569113896,
         "volumeTrend": "rising",
+        "passesScreen": false,
+        "screenNotes": [
+          "market cap below $250,000",
+          "pool is newer than 24h"
+        ],
+        "transactions24h": {
+          "buys": 10161,
+          "sells": 8786,
+          "buyers": 2207,
+          "sellers": 2005
+        },
+        "basePriceUsd": 0.000211261487236483,
+        "quotePriceUsd": 1885.71,
+        "baseTokenAddress": "0xfb97e1ca99378ea348eb794cbed099408ca74d1c"
+      },
+      {
+        "name": "DICE / WETH 1%",
+        "address": "0x399eae9d063cff3f0b05aa94256348c475001022",
+        "feeTierPercent": 1,
+        "ageHours": 23.25175972222222,
+        "marketCapUsd": null,
+        "reserveUsd": 31185.4621,
+        "volume24hUsd": 936841.078383406,
+        "volumeToTvl": 30.040955474038206,
+        "estDailyFeeReturnPercent": "30.04",
+        "fees24hUsd": 9368.41078383406,
+        "volumeTrend": "fading",
+        "passesScreen": false,
+        "screenNotes": [
+          "market cap below $250,000",
+          "24h volume below $1,000,000",
+          "pool is newer than 24h"
+        ],
+        "transactions24h": {
+          "buys": 5035,
+          "sells": 3953,
+          "buyers": 1498,
+          "sellers": 1183
+        },
+        "basePriceUsd": 0.000110019560420952,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x3f9f0b6073ee8c495aed96869af31850fed40feb"
+      },
+      {
+        "name": "DKIT / WETH 0.3%",
+        "address": "0xb3541a2aa55131692b72f159f3b8aa0833c901f579d41cb1ab2f17cbc87d7265",
+        "feeTierPercent": 0.3,
+        "ageHours": 7.135648611111111,
+        "marketCapUsd": null,
+        "reserveUsd": 65643.6844,
+        "volume24hUsd": 6128089.81835507,
+        "volumeToTvl": 93.353837073092,
+        "estDailyFeeReturnPercent": "28.01",
+        "fees24hUsd": 18384.269455065212,
+        "volumeTrend": "rising",
+        "passesScreen": false,
+        "screenNotes": [
+          "market cap below $250,000",
+          "pool is newer than 24h"
+        ],
+        "transactions24h": {
+          "buys": 3255,
+          "sells": 2800,
+          "buyers": 1978,
+          "sellers": 1475
+        },
+        "basePriceUsd": 0.00000259369651015143,
+        "quotePriceUsd": 1923.46,
+        "baseTokenAddress": "0x3935456196b159625c5f8dbe2d10677df678bf6a"
+      },
+      {
+        "name": "shitcoin / WETH 1%",
+        "address": "0xe3cb6f12f7c905c949723ebaa7d5af5ea0f9349c",
+        "feeTierPercent": 1,
+        "ageHours": 28.265093055555557,
+        "marketCapUsd": null,
+        "reserveUsd": 74710.4481,
+        "volume24hUsd": 1556713.233306,
+        "volumeToTvl": 20.83662021705904,
+        "estDailyFeeReturnPercent": "20.84",
+        "fees24hUsd": 15567.13233306,
+        "volumeTrend": "steady",
+        "passesScreen": false,
+        "screenNotes": [
+          "market cap below $250,000"
+        ],
+        "transactions24h": {
+          "buys": 3821,
+          "sells": 4246,
+          "buyers": 1214,
+          "sellers": 1233
+        },
+        "basePriceUsd": 0.000436867418640982,
+        "quotePriceUsd": 1886.15,
+        "baseTokenAddress": "0x49e34dbb35023d51f981558f54e5523fa9c44b03"
+      },
+      {
+        "name": "PIPEDOG / USDG 0.9%",
+        "address": "0xd3190abe4c13391d55a6a663b8391310116cdeaba6b1dde207c9f358a96820a5",
+        "feeTierPercent": 0.9,
+        "ageHours": 23.115370833333333,
+        "marketCapUsd": 41181196.5541681,
+        "reserveUsd": 26582.4767,
+        "volume24hUsd": 519415.350513321,
+        "volumeToTvl": 19.539765100718437,
+        "estDailyFeeReturnPercent": "17.59",
+        "fees24hUsd": 4674.738154619889,
+        "volumeTrend": "rising",
+        "passesScreen": false,
+        "screenNotes": [
+          "24h volume below $1,000,000",
+          "pool is newer than 24h"
+        ],
+        "transactions24h": {
+          "buys": 7834,
+          "sells": 7408,
+          "buyers": 978,
+          "sellers": 1059
+        },
+        "basePriceUsd": 0.00326498304203256,
+        "quotePriceUsd": 1.00148698340185,
+        "baseTokenAddress": "0x5cb6f181081301b44905f3ae15419112ecabd8a6"
+      },
+      {
+        "name": "Artcoin / WETH 1%",
+        "address": "0xd24ce69798d867f94293c7b9ee85271a61834986",
+        "feeTierPercent": 1,
+        "ageHours": 119.26620416666667,
+        "marketCapUsd": 266816.0692,
+        "reserveUsd": 51753.2207,
+        "volume24hUsd": 910186.807119288,
+        "volumeToTvl": 17.587056318589426,
+        "estDailyFeeReturnPercent": "17.59",
+        "fees24hUsd": 9101.868071192881,
+        "volumeTrend": "fading",
+        "passesScreen": false,
+        "screenNotes": [
+          "24h volume below $1,000,000"
+        ],
+        "transactions24h": {
+          "buys": 3587,
+          "sells": 3202,
+          "buyers": 572,
+          "sellers": 620
+        },
+        "basePriceUsd": 0.000266816069207017,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0x9516922a56171ab9834b88864d1010a6d8633296"
+      },
+      {
+        "name": "HOODon / USDG 0.3%",
+        "address": "0xeca312775bdfed66f1225263c6992b87d0ce314e",
+        "feeTierPercent": 0.3,
+        "ageHours": 159.3109263888889,
+        "marketCapUsd": null,
+        "reserveUsd": 52767.369,
+        "volume24hUsd": 735256.514139187,
+        "volumeToTvl": 13.933924091216053,
+        "estDailyFeeReturnPercent": "4.18",
+        "fees24hUsd": 2205.7695424175613,
+        "volumeTrend": "fading",
         "passesScreen": false,
         "screenNotes": [
           "market cap below $250,000",
           "24h volume below $1,000,000"
         ],
         "transactions24h": {
-          "buys": 3329,
-          "sells": 3333,
-          "buyers": 625,
-          "sellers": 627
+          "buys": 6040,
+          "sells": 5191,
+          "buyers": 1665,
+          "sellers": 1629
         },
-        "basePriceUsd": 0.000943664650005929,
-        "quotePriceUsd": 1.00025145880088
-      },
-      {
-        "name": "LEMON.FUN / WETH 1%",
-        "address": "0x01fe057d1c5fb09a4ac02860758ddf26df9336b5",
-        "feeTierPercent": 1,
-        "ageHours": 32.22972194444444,
-        "marketCapUsd": 0,
-        "reserveUsd": 68908.5099,
-        "volume24hUsd": 2561993.219581,
-        "volumeToTvl": 37.17963460970152,
-        "estDailyFeeReturnPercent": "37.18",
-        "volumeTrend": "fading",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000"
-        ],
-        "transactions24h": {
-          "buys": 12776,
-          "sells": 11039,
-          "buyers": 2424,
-          "sellers": 2298
-        },
-        "basePriceUsd": 0.000345810421735821,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "CATE / WETH 1%",
-        "address": "0xafcd748a49090f74903d148b60eb7dd2124d3db8",
-        "feeTierPercent": 1,
-        "ageHours": 2.2386108333333334,
-        "marketCapUsd": null,
-        "reserveUsd": 47913.1843,
-        "volume24hUsd": 1201219.5505277,
-        "volumeToTvl": 25.070751779019204,
-        "estDailyFeeReturnPercent": "25.07",
-        "volumeTrend": "rising",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 6250,
-          "sells": 4883,
-          "buyers": 1795,
-          "sellers": 1493
-        },
-        "basePriceUsd": 0.000208001916178385,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "COCO / WETH 1%",
-        "address": "0x27bcef20775c04f41ef29cec18dcabe89b5352c7",
-        "feeTierPercent": 1,
-        "ageHours": 14.008610833333334,
-        "marketCapUsd": null,
-        "reserveUsd": 38112.3005,
-        "volume24hUsd": 871538.082075927,
-        "volumeToTvl": 22.86763251344345,
-        "estDailyFeeReturnPercent": "22.87",
-        "volumeTrend": "steady",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "24h volume below $1,000,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 4192,
-          "sells": 4076,
-          "buyers": 1186,
-          "sellers": 1066
-        },
-        "basePriceUsd": 0.000149361638630232,
-        "quotePriceUsd": 1912.98
-      },
-      {
-        "name": "CARD / WETH 1%",
-        "address": "0x2e812ef5f076511489ccdc5790a4c464d750ec83",
-        "feeTierPercent": 1,
-        "ageHours": 21.213055277777777,
-        "marketCapUsd": null,
-        "reserveUsd": 36905.4511,
-        "volume24hUsd": 598727.325752162,
-        "volumeToTvl": 16.22327618025409,
-        "estDailyFeeReturnPercent": "16.22",
-        "volumeTrend": "steady",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "24h volume below $1,000,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 4111,
-          "sells": 3010,
-          "buyers": 1142,
-          "sellers": 977
-        },
-        "basePriceUsd": 0.000145351983503527,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "TYGR / WETH 1%",
-        "address": "0x94fc447f9e93b05af8ad8fbcac3549508cda0346",
-        "feeTierPercent": 1,
-        "ageHours": 147.44166638888888,
-        "marketCapUsd": 0,
-        "reserveUsd": 111232.833,
-        "volume24hUsd": 1426482.48466007,
-        "volumeToTvl": 12.824293387008042,
-        "estDailyFeeReturnPercent": "12.82",
-        "volumeTrend": "steady",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000"
-        ],
-        "transactions24h": {
-          "buys": 5515,
-          "sells": 4574,
-          "buyers": 548,
-          "sellers": 595
-        },
-        "basePriceUsd": 0.00106986170656379,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "KITTY / WETH 1%",
-        "address": "0x78173febf06f0077367dbabad0e4f2275f44b144d0a174c8ecd170a6b6c02876",
-        "feeTierPercent": 1,
-        "ageHours": 23.429999722222224,
-        "marketCapUsd": null,
-        "reserveUsd": 141299.1507,
-        "volume24hUsd": 1503786.79892119,
-        "volumeToTvl": 10.642574930361489,
-        "estDailyFeeReturnPercent": "10.64",
-        "volumeTrend": "steady",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 6406,
-          "sells": 5131,
-          "buyers": 2043,
-          "sellers": 1467
-        },
-        "basePriceUsd": 0.227956033276261,
-        "quotePriceUsd": 1912.2
-      },
-      {
-        "name": "BRODIE / WETH 1%",
-        "address": "0x9870c395bfa68c9f23d7c232fa5a37bf063aae35",
-        "feeTierPercent": 1,
-        "ageHours": 307.3422219444444,
-        "marketCapUsd": null,
-        "reserveUsd": 372831.0446,
-        "volume24hUsd": 3088621.66460228,
-        "volumeToTvl": 8.28423949490573,
-        "estDailyFeeReturnPercent": "8.28",
-        "volumeTrend": "steady",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000"
-        ],
-        "transactions24h": {
-          "buys": 6469,
-          "sells": 5538,
-          "buyers": 1314,
-          "sellers": 1445
-        },
-        "basePriceUsd": 0.00514698704373705,
-        "quotePriceUsd": 1912.15
+        "basePriceUsd": 88.4206683339791,
+        "quotePriceUsd": 1.00065566546789,
+        "baseTokenAddress": "0xfb5b5778d45ae47f15323fb59b666c655174a79c"
       },
       {
         "name": "GME / WETH 0.3%",
         "address": "0xb7eedf33d02c743507c38e1ee20ef421e60661c6",
         "feeTierPercent": 0.3,
-        "ageHours": 87.43083305555555,
+        "ageHours": 159.36787083333334,
         "marketCapUsd": null,
-        "reserveUsd": 72250.2007,
-        "volume24hUsd": 1541023.15145795,
-        "volumeToTvl": 21.328980909778288,
-        "estDailyFeeReturnPercent": "6.40",
-        "volumeTrend": "rising",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000"
-        ],
-        "transactions24h": {
-          "buys": 5279,
-          "sells": 4680,
-          "buyers": 657,
-          "sellers": 760
-        },
-        "basePriceUsd": 0.0000615939214391344,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "INK / WETH 0.1%",
-        "address": "0x8a7578d1140a4ac7896fd021e23174339cc8590dd8467a0fd462789d2ce190fd",
-        "feeTierPercent": 0.1,
-        "ageHours": 12.985833055555556,
-        "marketCapUsd": null,
-        "reserveUsd": 26008.8731,
-        "volume24hUsd": 1567181.95884273,
-        "volumeToTvl": 60.255665549874585,
-        "estDailyFeeReturnPercent": "6.03",
-        "volumeTrend": "fading",
+        "reserveUsd": 53812.3534,
+        "volume24hUsd": 573018.684509656,
+        "volumeToTvl": 10.64845984806262,
+        "estDailyFeeReturnPercent": "3.19",
+        "fees24hUsd": 1719.0560535289683,
+        "volumeTrend": "steady",
         "passesScreen": false,
         "screenNotes": [
           "market cap below $250,000",
-          "pool is newer than 24h"
+          "24h volume below $1,000,000"
         ],
         "transactions24h": {
-          "buys": 9356,
-          "sells": 8670,
-          "buyers": 2322,
-          "sellers": 2071
+          "buys": 3003,
+          "sells": 2710,
+          "buyers": 496,
+          "sellers": 546
         },
-        "basePriceUsd": 0.0000746595703658726,
-        "quotePriceUsd": 1912.15
+        "basePriceUsd": 0.000032492550025601,
+        "quotePriceUsd": 1885.48,
+        "baseTokenAddress": "0xc2362aff2a2a4cc1f48cf3dab2c4e2605eb94ba3"
       },
       {
-        "name": "RWI / WETH 1%",
-        "address": "0xff6aa24815d1274a9be0cfd17c7c7489cd40a697",
+        "name": "BOND / WETH 1%",
+        "address": "0x00a6314ed31b3eee9fd0c6c670dbc144f2b06e29",
         "feeTierPercent": 1,
-        "ageHours": 196.5166663888889,
+        "ageHours": 6.144815277777778,
         "marketCapUsd": null,
-        "reserveUsd": 35117.868,
-        "volume24hUsd": 190544.292106858,
-        "volumeToTvl": 5.425850228346948,
-        "estDailyFeeReturnPercent": "5.43",
+        "reserveUsd": 68522.8684,
+        "volume24hUsd": 182443.658931387,
+        "volumeToTvl": 2.66252220888329,
+        "estDailyFeeReturnPercent": "2.66",
+        "fees24hUsd": 1824.4365893138702,
         "volumeTrend": "rising",
         "passesScreen": false,
         "screenNotes": [
           "market cap below $250,000",
-          "24h volume below $1,000,000"
-        ],
-        "transactions24h": {
-          "buys": 6847,
-          "sells": 2707,
-          "buyers": 2783,
-          "sellers": 1411
-        },
-        "basePriceUsd": 0.000101382907084487,
-        "quotePriceUsd": 1906.2
-      },
-      {
-        "name": "HOODER / WETH 1%",
-        "address": "0x24b832e0715eecce1b89359fc4270f1fa6508b2a",
-        "feeTierPercent": 1,
-        "ageHours": 129.74666638888888,
-        "marketCapUsd": 0,
-        "reserveUsd": 134680.8862,
-        "volume24hUsd": 417751.870238375,
-        "volumeToTvl": 3.101790328421339,
-        "estDailyFeeReturnPercent": "3.10",
-        "volumeTrend": "rising",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "24h volume below $1,000,000"
-        ],
-        "transactions24h": {
-          "buys": 7306,
-          "sells": 3473,
-          "buyers": 964,
-          "sellers": 958
-        },
-        "basePriceUsd": 0.00175930961080455,
-        "quotePriceUsd": 1912.15
-      },
-      {
-        "name": "RTKR / WETH 0.3%",
-        "address": "0xae25493ee7860c62898ee742dab0a2472c75a8ee85fb5e375ab926bc5cb69986",
-        "feeTierPercent": 0.3,
-        "ageHours": 16.287499722222222,
-        "marketCapUsd": null,
-        "reserveUsd": 432319.4558,
-        "volume24hUsd": 4347783.5874749,
-        "volumeToTvl": 10.056876990255732,
-        "estDailyFeeReturnPercent": "3.02",
-        "volumeTrend": "fading",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
+          "24h volume below $1,000,000",
           "pool is newer than 24h"
         ],
         "transactions24h": {
-          "buys": 3858,
-          "sells": 3272,
-          "buyers": 2126,
-          "sellers": 1651
+          "buys": 5779,
+          "sells": 4064,
+          "buyers": 1330,
+          "sellers": 1199
         },
-        "basePriceUsd": 0.00000805086463149067,
-        "quotePriceUsd": 1885.34
+        "basePriceUsd": 0.000484911192175156,
+        "quotePriceUsd": 1886.15,
+        "baseTokenAddress": "0x554001edc548e425b93522d8c17cf0918123a629"
       },
       {
-        "name": "GME / USDG 0.3%",
-        "address": "0x9c8ea0472177f67b3b88cff3af61aa6b99e1b2cadac67e36d157f4a4601c3d78",
-        "feeTierPercent": 0.3,
-        "ageHours": 82.92222194444444,
-        "marketCapUsd": null,
-        "reserveUsd": 32900.8162,
-        "volume24hUsd": 245514.706263134,
-        "volumeToTvl": 7.462267950152981,
-        "estDailyFeeReturnPercent": "2.24",
-        "volumeTrend": "rising",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "24h volume below $1,000,000"
-        ],
-        "transactions24h": {
-          "buys": 4320,
-          "sells": 4142,
-          "buyers": 280,
-          "sellers": 361
-        },
-        "basePriceUsd": 0.0000615747165935677,
-        "quotePriceUsd": 0.99972786349326
-      },
-      {
-        "name": "BARRIER / WETH 0.01%",
-        "address": "0x4c5647ace42a842464574041e1bf06a4a65a8f5d",
+        "name": "Fauci / WETH 0.01%",
+        "address": "0x99bc780a100403dc493f6169ffe33d090c8573d1",
         "feeTierPercent": 0.01,
-        "ageHours": 15.067499722222221,
+        "ageHours": 6.690648611111111,
         "marketCapUsd": null,
-        "reserveUsd": 11597.437,
-        "volume24hUsd": 1739906.47690683,
-        "volumeToTvl": 150.02508544834777,
-        "estDailyFeeReturnPercent": "1.50",
-        "volumeTrend": "fading",
+        "reserveUsd": 49334.4588,
+        "volume24hUsd": 2245927.36495999,
+        "volumeToTvl": 45.524516120971214,
+        "estDailyFeeReturnPercent": "0.46",
+        "fees24hUsd": 224.59273649599902,
+        "volumeTrend": "rising",
         "passesScreen": false,
         "screenNotes": [
           "market cap below $250,000",
           "pool is newer than 24h"
         ],
         "transactions24h": {
-          "buys": 3412,
-          "sells": 3240,
-          "buyers": 2044,
-          "sellers": 1733
+          "buys": 3603,
+          "sells": 3278,
+          "buyers": 864,
+          "sellers": 829
         },
-        "basePriceUsd": 0.0000114968983440309,
-        "quotePriceUsd": 1911.15
-      },
-      {
-        "name": "INK / WETH 0.01%",
-        "address": "0x849ad0b03ab9b694756b89c9e66ab09cc4621e6f1a2605bf4d097fa391486b43",
-        "feeTierPercent": 0.01,
-        "ageHours": 12.819444166666667,
-        "marketCapUsd": null,
-        "reserveUsd": 99207.1224,
-        "volume24hUsd": 3378402.22651671,
-        "volumeToTvl": 34.054029033269394,
-        "estDailyFeeReturnPercent": "0.34",
-        "volumeTrend": "fading",
-        "passesScreen": false,
-        "screenNotes": [
-          "market cap below $250,000",
-          "pool is newer than 24h"
-        ],
-        "transactions24h": {
-          "buys": 3736,
-          "sells": 3391,
-          "buyers": 2223,
-          "sellers": 1612
-        },
-        "basePriceUsd": 0.000368547393267155,
-        "quotePriceUsd": 1910.64
+        "basePriceUsd": 0.0000694927954980329,
+        "quotePriceUsd": 1916.92,
+        "baseTokenAddress": "0x5987e211f6f0a29d80e92b9b14cc09dcc76327ea"
       },
       {
         "name": "WETH / USDG 0.046%",
         "address": "0x54f7883914619af9105355bf83ed678bcf9f63560218ac61c9963b9503d0ba32",
         "feeTierPercent": 0.046,
-        "ageHours": 438.50249972222224,
+        "ageHours": 510.4395375,
         "marketCapUsd": null,
-        "reserveUsd": 1036994.1286,
-        "volume24hUsd": 2214088.87811255,
-        "volumeToTvl": 2.1351026173134593,
-        "estDailyFeeReturnPercent": "0.10",
-        "volumeTrend": "steady",
+        "reserveUsd": 902979.3749,
+        "volume24hUsd": 3003153.64414546,
+        "volumeToTvl": 3.325827507940635,
+        "estDailyFeeReturnPercent": "0.15",
+        "fees24hUsd": 1381.4506763069116,
+        "volumeTrend": "rising",
         "passesScreen": false,
         "screenNotes": [
           "market cap below $250,000"
         ],
         "transactions24h": {
-          "buys": 3560,
-          "sells": 3347,
-          "buyers": 1544,
-          "sellers": 1470
+          "buys": 4643,
+          "sells": 4388,
+          "buyers": 1229,
+          "sellers": 1239
         },
-        "basePriceUsd": 1912.15,
-        "quotePriceUsd": 0.999859522068352
+        "basePriceUsd": 1886.15,
+        "quotePriceUsd": 1.00268568118731,
+        "baseTokenAddress": "0x0000000000000000000000000000000000000000"
+      },
+      {
+        "name": "gme / USDG 0.05%",
+        "address": "0xe2b46c905e12ab8e2f864e4821a4325884c1b126",
+        "feeTierPercent": 0.05,
+        "ageHours": 144.4945375,
+        "marketCapUsd": 833390.975634504,
+        "reserveUsd": 359984.3263,
+        "volume24hUsd": 956532.260226354,
+        "volumeToTvl": 2.6571497433174605,
+        "estDailyFeeReturnPercent": "0.13",
+        "fees24hUsd": 478.266130113177,
+        "volumeTrend": "rising",
+        "passesScreen": false,
+        "screenNotes": [
+          "24h volume below $1,000,000"
+        ],
+        "transactions24h": {
+          "buys": 3009,
+          "sells": 2564,
+          "buyers": 1114,
+          "sellers": 1182
+        },
+        "basePriceUsd": 21.8647627353991,
+        "quotePriceUsd": 1.00156913599007,
+        "baseTokenAddress": "0x1b0e319c6a659f002271b69db8a7df2f911c153e"
       },
       {
         "name": "WETH / USDG 0.01%",
         "address": "0x24107d152f14a76d292123265ae3f3c71f863fc2f4ef7ba49d64e78d28ea379e",
         "feeTierPercent": 0.01,
-        "ageHours": 588.0433330555555,
+        "ageHours": 659.9803708333334,
         "marketCapUsd": null,
-        "reserveUsd": 14521.7186,
-        "volume24hUsd": 88569.8265350163,
-        "volumeToTvl": 6.09912841411321,
-        "estDailyFeeReturnPercent": "0.06",
-        "volumeTrend": "rising",
+        "reserveUsd": 14484.4459,
+        "volume24hUsd": 107585.882543111,
+        "volumeToTvl": 7.427683688135492,
+        "estDailyFeeReturnPercent": "0.07",
+        "fees24hUsd": 10.758588254311102,
+        "volumeTrend": "steady",
         "passesScreen": false,
         "screenNotes": [
           "market cap below $250,000",
-          "24h volume below $1,000,000"
+          "24h volume below $1,000,000",
+          "pool fees below $75/day in absolute terms"
         ],
         "transactions24h": {
-          "buys": 3289,
-          "sells": 3374,
-          "buyers": 762,
-          "sellers": 884
+          "buys": 3794,
+          "sells": 3775,
+          "buyers": 921,
+          "sellers": 1037
         },
-        "basePriceUsd": 1912.2,
-        "quotePriceUsd": 1.00028892815934
+        "basePriceUsd": 1885.48,
+        "quotePriceUsd": 1.00201069139515,
+        "baseTokenAddress": "0x0000000000000000000000000000000000000000"
       }
     ],
     "disclaimer": "Opportunity data is third-party (GeckoTerminal) and unverified on-chain. Screen criteria follow public LP guidance, not deposit-grade evidence. Not a recommendation to deploy capital; tokens and pools require independent verification."
@@ -1294,74 +1292,74 @@
   "risk": {
     "mode": "read-only",
     "source": "geckoterminal",
-    "generatedAt": "2026-07-26T21:00:43.999Z",
+    "generatedAt": "2026-07-29T20:56:57.335Z",
     "rangePercent": 10,
     "pools": [
       {
-        "address": "0x4be9657ec9002e528f4f17a5c43edc525a07f888f7b180c2afbf75e096c4f38a",
-        "name": "PONS / USDG 0.3%",
-        "historyDays": 9,
+        "address": "0xb7f10f74b39291b9290b779978e19a7637c742d6",
+        "name": "PIPEDOG / WETH 1%",
+        "historyDays": 2,
         "closes": [
-          76.1462850314816,
-          58.3315308350749,
-          48.9834522139304,
-          25.6752008342294,
-          32.0199397642814,
-          31.9218908020387,
-          24.5585949166714,
-          25.0584523429949,
-          20.3093764955378
+          667222.665658673,
+          582746.595846231
         ],
-        "impermanentLossPercent": "-57.88",
-        "grossFeeReturnPercent": "295.68",
-        "netReturnPercent": "-25.03",
+        "impermanentLossPercent": "-4.43",
+        "grossFeeReturnPercent": "3883.60",
+        "netReturnPercent": "1937.37",
         "inRange": {
-          "days": 9,
+          "days": 2,
           "daysCloseInRange": 1,
           "daysFullyInRange": 0,
-          "closeInRangeDecimal": 0.1111111111111111,
+          "closeInRangeDecimal": 0.5,
           "fullyInRangeDecimal": 0,
           "rangePercent": 10
         },
         "stability": {
-          "days": 9,
-          "sufficientHistory": true,
-          "medianDailyReturnPercent": "38.245",
-          "minDailyReturnPercent": "4.673",
-          "maxDailyReturnPercent": "66.898",
+          "days": 2,
+          "sufficientHistory": false,
+          "medianDailyReturnPercent": "1941.799",
+          "minDailyReturnPercent": "1262.389",
+          "maxDailyReturnPercent": "2621.209",
           "spikeDriven": false
         },
         "organic": {
-          "uniqueTraders": 2485,
-          "tradesPerTrader": 3.9593561368209254,
-          "volumePerTraderUsd": 1037.214100320157,
-          "buyShareDecimal": 0.491005183453603,
+          "uniqueTraders": 9436,
+          "tradesPerTrader": 6.233891479440441,
+          "volumePerTraderUsd": 8396.362637559887,
+          "buyShareDecimal": 0.6098974890774017,
           "suspicious": false,
           "notes": []
         },
+        "tokenSafety": {
+          "address": "0x5cb6f181081301b44905f3ae15419112ecabd8a6",
+          "verified": true,
+          "isProxy": false,
+          "contractName": "pipedog"
+        },
         "warnings": [
+          "fewer than three days of history",
           "price stayed fully inside +/-10% on only 0% of days"
         ]
       },
       {
-        "address": "0xa92a3df27a00a276183ff7265fd8affa11df1fe8bb23ddfaf13f6c879a3f818b",
-        "name": "CASHCAT / USDG 0.269%",
+        "address": "0xd42a491087a15e5afd51feb3606066cc152d2b09",
+        "name": "CASHCAT / WETH 0.3%",
         "historyDays": 10,
         "closes": [
-          15.0380592694734,
-          15.9946718958074,
-          12.5892538155689,
-          13.3063679198953,
-          14.4923262840306,
-          18.8532495951198,
-          21.9163159882604,
-          20.4302759953769,
-          18.9487384782433,
-          23.9909284200004
+          25328.3157685413,
+          27975.170189077,
+          36597.8718862547,
+          41356.6055436772,
+          37946.3407151598,
+          35715.1817120079,
+          43369.0223740614,
+          53226.2964644349,
+          36665.7061285053,
+          50537.8860740789
         ],
-        "impermanentLossPercent": "-20.26",
-        "grossFeeReturnPercent": "457.76",
-        "netReturnPercent": "71.29",
+        "impermanentLossPercent": "-30.55",
+        "grossFeeReturnPercent": "416.95",
+        "netReturnPercent": "52.84",
         "inRange": {
           "days": 10,
           "daysCloseInRange": 2,
@@ -1373,327 +1371,382 @@
         "stability": {
           "days": 10,
           "sufficientHistory": true,
-          "medianDailyReturnPercent": "26.713",
-          "minDailyReturnPercent": "9.521",
-          "maxDailyReturnPercent": "171.796",
-          "spikeDriven": true
+          "medianDailyReturnPercent": "37.965",
+          "minDailyReturnPercent": "10.686",
+          "maxDailyReturnPercent": "72.180",
+          "spikeDriven": false
         },
         "organic": {
-          "uniqueTraders": 1404,
-          "tradesPerTrader": 5.266381766381766,
-          "volumePerTraderUsd": 1976.2377484043805,
-          "buyShareDecimal": 0.5347579118203949,
+          "uniqueTraders": 2842,
+          "tradesPerTrader": 4.776917663617171,
+          "volumePerTraderUsd": 926.2115015658796,
+          "buyShareDecimal": 0.501694166175604,
           "suspicious": false,
           "notes": []
         },
+        "tokenSafety": {
+          "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+          "verified": true,
+          "isProxy": false,
+          "contractName": "LaunchToken"
+        },
         "warnings": [
-          "yield is spike-driven, not persistent",
           "price stayed fully inside +/-10% on only 0% of days"
         ]
       },
       {
-        "address": "0x9cc8c4f6118419a27f113723f1dea646685be55f",
-        "name": "VIRTUAL / WETH 0.05%",
+        "address": "0x10cc6bd38112cac182db90b6a71d8bb5939526ba",
+        "name": "PONS / WETH 1%",
         "historyDays": 10,
         "closes": [
-          2936.31488734121,
-          3007.86893476795,
-          3041.04347277278,
-          2967.66923573003,
-          2914.89263855335,
-          3082.84872122204,
-          3068.9910543978,
-          3166.43626538271,
-          3217.98922822831,
-          3244.83922505613
+          91869.3515679005,
+          50004.1879500801,
+          61913.6911759619,
+          60256.9929856154,
+          45892.5537683573,
+          46806.9498668466,
+          38565.2991650688,
+          37639.8970658598,
+          54790.5394899523,
+          47959.8928524294
         ],
-        "impermanentLossPercent": "-2.55",
-        "grossFeeReturnPercent": "13.16",
-        "netReturnPercent": "9.29",
+        "impermanentLossPercent": "-30.52",
+        "grossFeeReturnPercent": "992.86",
+        "netReturnPercent": "366.62",
         "inRange": {
           "days": 10,
-          "daysCloseInRange": 9,
-          "daysFullyInRange": 5,
-          "closeInRangeDecimal": 0.9,
-          "fullyInRangeDecimal": 0.5,
+          "daysCloseInRange": 4,
+          "daysFullyInRange": 0,
+          "closeInRangeDecimal": 0.4,
+          "fullyInRangeDecimal": 0,
           "rangePercent": 10
         },
         "stability": {
           "days": 10,
           "sufficientHistory": true,
-          "medianDailyReturnPercent": "1.220",
-          "minDailyReturnPercent": "0.521",
-          "maxDailyReturnPercent": "2.061",
+          "medianDailyReturnPercent": "71.890",
+          "minDailyReturnPercent": "27.112",
+          "maxDailyReturnPercent": "189.499",
           "spikeDriven": false
         },
         "organic": {
-          "uniqueTraders": 2865,
-          "tradesPerTrader": 2.9769633507853404,
-          "volumePerTraderUsd": 774.8281813019616,
-          "buyShareDecimal": 0.5134247860241529,
+          "uniqueTraders": 3071,
+          "tradesPerTrader": 2.428524910452621,
+          "volumePerTraderUsd": 2006.2931019478476,
+          "buyShareDecimal": 0.5994904800214534,
           "suspicious": false,
           "notes": []
         },
-        "warnings": []
-      },
-      {
-        "address": "0xe2b46c905e12ab8e2f864e4821a4325884c1b126",
-        "name": "gme / USDG 0.05%",
-        "historyDays": 4,
-        "closes": [
-          0.0473808410968367,
-          0.0466666520691073,
-          0.0471668045111504,
-          0.0471927069750523
-        ],
-        "impermanentLossPercent": "-0.00",
-        "grossFeeReturnPercent": "0.08",
-        "netReturnPercent": "0.08",
-        "inRange": {
-          "days": 4,
-          "daysCloseInRange": 4,
-          "daysFullyInRange": 4,
-          "closeInRangeDecimal": 1,
-          "fullyInRangeDecimal": 1,
-          "rangePercent": 10
-        },
-        "stability": {
-          "days": 4,
-          "sufficientHistory": true,
-          "medianDailyReturnPercent": "0.013",
-          "minDailyReturnPercent": "0.001",
-          "maxDailyReturnPercent": "0.056",
-          "spikeDriven": true
-        },
-        "organic": {
-          "uniqueTraders": 3983,
-          "tradesPerTrader": 2.815967863419533,
-          "volumePerTraderUsd": 529.2542699431935,
-          "buyShareDecimal": 0.5476105563480742,
-          "suspicious": false,
-          "notes": []
+        "tokenSafety": {
+          "address": "0x39dbed3a2bd333467115de45665cc57f813c4571",
+          "verified": true,
+          "isProxy": false,
+          "contractName": "PonsLauncherToken"
         },
         "warnings": [
-          "yield is spike-driven, not persistent"
+          "price stayed fully inside +/-10% on only 0% of days"
         ]
       },
       {
-        "address": "0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3",
-        "name": "nvda / USDG 0.05%",
-        "historyDays": 6,
+        "address": "0x1252fbfc4f6530a025ca351494245797b2a147b7b5d2dc8af7893e4e1a2e9df3",
+        "name": "CASHCAT / WETH 0.29%",
+        "historyDays": 3,
         "closes": [
-          0.0048507794961402,
-          0.0047180299813073,
-          0.00480968656635817,
-          0.00483775268962299,
-          0.00480172776690943,
-          0.004797093458698
+          53152.173354443,
+          36712.3675342022,
+          50505.0843425714
         ],
-        "impermanentLossPercent": "-0.03",
-        "grossFeeReturnPercent": "0.01",
-        "netReturnPercent": "-0.02",
+        "impermanentLossPercent": "-0.67",
+        "grossFeeReturnPercent": "145.39",
+        "netReturnPercent": "96.26",
         "inRange": {
-          "days": 6,
-          "daysCloseInRange": 6,
-          "daysFullyInRange": 6,
-          "closeInRangeDecimal": 1,
-          "fullyInRangeDecimal": 1,
+          "days": 3,
+          "daysCloseInRange": 2,
+          "daysFullyInRange": 1,
+          "closeInRangeDecimal": 0.6666666666666666,
+          "fullyInRangeDecimal": 0.3333333333333333,
           "rangePercent": 10
         },
         "stability": {
-          "days": 6,
+          "days": 3,
           "sufficientHistory": true,
-          "medianDailyReturnPercent": "0.001",
-          "minDailyReturnPercent": "0.000",
-          "maxDailyReturnPercent": "0.003",
+          "medianDailyReturnPercent": "57.873",
+          "minDailyReturnPercent": "19.483",
+          "maxDailyReturnPercent": "68.033",
           "spikeDriven": false
         },
         "organic": {
-          "uniqueTraders": 6423,
-          "tradesPerTrader": 2.9156157558773157,
-          "volumePerTraderUsd": 664.3530325623946,
-          "buyShareDecimal": 0.5364981043413254,
+          "uniqueTraders": 1516,
+          "tradesPerTrader": 5.310686015831134,
+          "volumePerTraderUsd": 1806.7860227664314,
+          "buyShareDecimal": 0.5044093901378711,
           "suspicious": false,
           "notes": []
         },
-        "warnings": []
+        "tokenSafety": {
+          "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+          "verified": true,
+          "isProxy": false,
+          "contractName": "LaunchToken"
+        },
+        "warnings": [
+          "price stayed fully inside +/-10% on only 33% of days"
+        ]
       },
       {
-        "address": "0x84bd4e2d8be11aeb0afc1195b38f587b61e90068548f1063fdbe448fb8cad0b6",
-        "name": "USDG / WETH 0.02%",
-        "historyDays": 9,
-        "closes": [
-          1854.96400756674,
-          1841.7696748841,
-          1904.47405821783,
-          1927.56973249758,
-          1932.22669852529,
-          1877.34437908497,
-          1860.63251675943,
-          1873.52433649006,
-          1912.81570793659
-        ],
-        "impermanentLossPercent": "-0.24",
-        "grossFeeReturnPercent": "1.01",
-        "netReturnPercent": "0.77",
-        "inRange": {
-          "days": 9,
-          "daysCloseInRange": 9,
-          "daysFullyInRange": 9,
-          "closeInRangeDecimal": 1,
-          "fullyInRangeDecimal": 1,
-          "rangePercent": 10
-        },
-        "stability": {
-          "days": 9,
-          "sufficientHistory": true,
-          "medianDailyReturnPercent": "0.105",
-          "minDailyReturnPercent": "0.001",
-          "maxDailyReturnPercent": "0.282",
-          "spikeDriven": false
-        },
-        "organic": {
-          "uniqueTraders": 4782,
-          "tradesPerTrader": 3.717900460058553,
-          "volumePerTraderUsd": 953.6062099950063,
-          "buyShareDecimal": 0.4677428426795658,
-          "suspicious": false,
-          "notes": []
-        },
-        "warnings": []
-      },
-      {
-        "address": "0x52e65b17fb6e5ba00ed806f37afcd2daa50271ca",
-        "name": "USDG / WETH 0.01%",
+        "address": "0xa92a3df27a00a276183ff7265fd8affa11df1fe8bb23ddfaf13f6c879a3f818b",
+        "name": "CASHCAT / USDG 0.269%",
         "historyDays": 10,
         "closes": [
-          1834.49197465874,
-          1856.26176082926,
-          1868.65356852026,
-          1904.12110510994,
-          1928.71231443545,
-          1932.44327272727,
-          1877.85808819578,
-          1860.50326559999,
-          1873.44239850973,
-          1912.8633815017
+          13.3063679198953,
+          14.4923262840306,
+          18.8532495951198,
+          21.9163159882604,
+          20.4302759953769,
+          18.9487384782433,
+          22.2143846273003,
+          28.1263844168376,
+          19.1181847008586,
+          26.9670187028333
         ],
-        "impermanentLossPercent": "-0.45",
-        "grossFeeReturnPercent": "1.48",
-        "netReturnPercent": "1.03",
+        "impermanentLossPercent": "-31.25",
+        "grossFeeReturnPercent": "512.84",
+        "netReturnPercent": "71.32",
         "inRange": {
           "days": 10,
-          "daysCloseInRange": 10,
-          "daysFullyInRange": 10,
-          "closeInRangeDecimal": 1,
-          "fullyInRangeDecimal": 1,
+          "daysCloseInRange": 2,
+          "daysFullyInRange": 0,
+          "closeInRangeDecimal": 0.2,
+          "fullyInRangeDecimal": 0,
           "rangePercent": 10
         },
         "stability": {
           "days": 10,
           "sufficientHistory": true,
-          "medianDailyReturnPercent": "0.156",
-          "minDailyReturnPercent": "0.078",
-          "maxDailyReturnPercent": "0.235",
+          "medianDailyReturnPercent": "47.186",
+          "minDailyReturnPercent": "20.149",
+          "maxDailyReturnPercent": "100.452",
           "spikeDriven": false
         },
         "organic": {
-          "uniqueTraders": 21998,
-          "tradesPerTrader": 9.859259932721157,
-          "volumePerTraderUsd": 2467.68402447212,
-          "buyShareDecimal": 0.4704311982442227,
+          "uniqueTraders": 2065,
+          "tradesPerTrader": 6.814043583535109,
+          "volumePerTraderUsd": 2304.258754815656,
+          "buyShareDecimal": 0.49349726387605714,
           "suspicious": false,
           "notes": []
         },
-        "warnings": []
+        "tokenSafety": {
+          "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+          "verified": true,
+          "isProxy": false,
+          "contractName": "LaunchToken"
+        },
+        "warnings": [
+          "price stayed fully inside +/-10% on only 0% of days"
+        ]
       },
       {
-        "address": "0x69bfaf19c9f377bb306a89aed9f6b07e2c1a8d9a",
-        "name": "USDG / WETH 0.05%",
+        "address": "0x4be9657ec9002e528f4f17a5c43edc525a07f888f7b180c2afbf75e096c4f38a",
+        "name": "PONS / USDG 0.3%",
         "historyDays": 10,
         "closes": [
-          1835.00903157827,
-          1854.84958,
-          1869.61035910982,
-          1902.92771057031,
-          1927.50710656036,
-          1933.48474006424,
-          1876.46708469347,
-          1859.14563636364,
-          1871.75707070707,
-          1913.07926038429
+          48.9834522139304,
+          25.6752008342294,
+          32.0199397642814,
+          31.9218908020387,
+          24.5585949166714,
+          25.0584523429949,
+          19.6476572032638,
+          20.1490272622085,
+          28.250414089792,
+          25.7260986302949
         ],
-        "impermanentLossPercent": "-0.44",
-        "grossFeeReturnPercent": "1.67",
-        "netReturnPercent": "1.23",
+        "impermanentLossPercent": "-30.24",
+        "grossFeeReturnPercent": "534.12",
+        "netReturnPercent": "236.82",
         "inRange": {
           "days": 10,
-          "daysCloseInRange": 10,
-          "daysFullyInRange": 10,
-          "closeInRangeDecimal": 1,
-          "fullyInRangeDecimal": 1,
+          "daysCloseInRange": 5,
+          "daysFullyInRange": 0,
+          "closeInRangeDecimal": 0.5,
+          "fullyInRangeDecimal": 0,
           "rangePercent": 10
         },
         "stability": {
           "days": 10,
           "sufficientHistory": true,
-          "medianDailyReturnPercent": "0.163",
-          "minDailyReturnPercent": "0.058",
-          "maxDailyReturnPercent": "0.265",
+          "medianDailyReturnPercent": "56.920",
+          "minDailyReturnPercent": "14.931",
+          "maxDailyReturnPercent": "79.428",
           "spikeDriven": false
         },
         "organic": {
-          "uniqueTraders": 3263,
-          "tradesPerTrader": 4.596996628869139,
-          "volumePerTraderUsd": 1100.549276815593,
-          "buyShareDecimal": 0.4736,
+          "uniqueTraders": 3460,
+          "tradesPerTrader": 3.373699421965318,
+          "volumePerTraderUsd": 978.2029694147832,
+          "buyShareDecimal": 0.5593249378908592,
           "suspicious": false,
           "notes": []
         },
-        "warnings": []
+        "tokenSafety": {
+          "address": "0x39dbed3a2bd333467115de45665cc57f813c4571",
+          "verified": true,
+          "isProxy": false,
+          "contractName": "PonsLauncherToken"
+        },
+        "warnings": [
+          "price stayed fully inside +/-10% on only 0% of days"
+        ]
+      },
+      {
+        "address": "0xa70fc67c9f69da90b63a0e4c05d229954574e313",
+        "name": "CASHCAT / WETH 1%",
+        "historyDays": 10,
+        "closes": [
+          25623.423408962,
+          28199.258523796,
+          36729.6105074204,
+          41203.2446994809,
+          37989.4714582291,
+          36131.1695830381,
+          43350.5563265076,
+          52417.3902447212,
+          36730.2000330007,
+          50500.0309990729
+        ],
+        "impermanentLossPercent": "-30.00",
+        "grossFeeReturnPercent": "295.77",
+        "netReturnPercent": "29.15",
+        "inRange": {
+          "days": 10,
+          "daysCloseInRange": 2,
+          "daysFullyInRange": 0,
+          "closeInRangeDecimal": 0.2,
+          "fullyInRangeDecimal": 0,
+          "rangePercent": 10
+        },
+        "stability": {
+          "days": 10,
+          "sufficientHistory": true,
+          "medianDailyReturnPercent": "24.781",
+          "minDailyReturnPercent": "8.235",
+          "maxDailyReturnPercent": "48.155",
+          "spikeDriven": false
+        },
+        "organic": {
+          "uniqueTraders": 2549,
+          "tradesPerTrader": 3.9517457826598665,
+          "volumePerTraderUsd": 3302.617339729592,
+          "buyShareDecimal": 0.5502829345775836,
+          "suspicious": false,
+          "notes": []
+        },
+        "tokenSafety": {
+          "address": "0x020bfc650a365f8bb26819deaabf3e21291018b4",
+          "verified": true,
+          "isProxy": false,
+          "contractName": "LaunchToken"
+        },
+        "warnings": [
+          "price stayed fully inside +/-10% on only 0% of days"
+        ]
+      },
+      {
+        "address": "0xd33c8fd38b06e989cdbd4dffdefab71c4bdd415b24964c8d69e38ff35b068f92",
+        "name": "STONKBROKER / WETH 1%",
+        "historyDays": 10,
+        "closes": [
+          527755.973711953,
+          617804.06116411,
+          610585.42671106,
+          640276.27423064,
+          446630.653100457,
+          391212.659439107,
+          305752.061852498,
+          312172.659369444,
+          315566.500655015,
+          213736.49302059
+        ],
+        "impermanentLossPercent": "-41.92",
+        "grossFeeReturnPercent": "1743.49",
+        "netReturnPercent": "132.43",
+        "inRange": {
+          "days": 10,
+          "daysCloseInRange": 1,
+          "daysFullyInRange": 0,
+          "closeInRangeDecimal": 0.1,
+          "fullyInRangeDecimal": 0,
+          "rangePercent": 10
+        },
+        "stability": {
+          "days": 10,
+          "sufficientHistory": true,
+          "medianDailyReturnPercent": "144.165",
+          "minDailyReturnPercent": "72.848",
+          "maxDailyReturnPercent": "390.818",
+          "spikeDriven": false
+        },
+        "organic": {
+          "uniqueTraders": 2131,
+          "tradesPerTrader": 3.08916001877053,
+          "volumePerTraderUsd": 1684.483360012229,
+          "buyShareDecimal": 0.6121828953364727,
+          "suspicious": false,
+          "notes": []
+        },
+        "tokenSafety": {
+          "address": "0xe934e36a439c94017b64a3fece66af12099abf50",
+          "verified": true,
+          "isProxy": false,
+          "contractName": "CollectionToken"
+        },
+        "warnings": [
+          "price stayed fully inside +/-10% on only 0% of days"
+        ]
       }
     ],
     "bestTiers": [
       {
-        "pair": "cashcat/usdg",
-        "bestName": "CASHCAT / USDG 0.269%",
-        "bestAddress": "0xa92a3df27a00a276183ff7265fd8affa11df1fe8bb23ddfaf13f6c879a3f818b",
-        "bestNetPercent": "71.29",
+        "pair": "pipedog/weth",
+        "bestName": "PIPEDOG / WETH 1%",
+        "bestAddress": "0xb7f10f74b39291b9290b779978e19a7637c742d6",
+        "bestNetPercent": "1937.37",
         "alternatives": 0
       },
       {
-        "pair": "virtual/weth",
-        "bestName": "VIRTUAL / WETH 0.05%",
-        "bestAddress": "0x9cc8c4f6118419a27f113723f1dea646685be55f",
-        "bestNetPercent": "9.29",
-        "alternatives": 0
-      },
-      {
-        "pair": "usdg/weth",
-        "bestName": "USDG / WETH 0.05%",
-        "bestAddress": "0x69bfaf19c9f377bb306a89aed9f6b07e2c1a8d9a",
-        "bestNetPercent": "1.23",
-        "alternatives": 2
-      },
-      {
-        "pair": "gme/usdg",
-        "bestName": "gme / USDG 0.05%",
-        "bestAddress": "0xe2b46c905e12ab8e2f864e4821a4325884c1b126",
-        "bestNetPercent": "0.08",
-        "alternatives": 0
-      },
-      {
-        "pair": "nvda/usdg",
-        "bestName": "nvda / USDG 0.05%",
-        "bestAddress": "0xd4eb21209c4d6093f80b5b84f5c45cc093ea14a3",
-        "bestNetPercent": "-0.02",
+        "pair": "pons/weth",
+        "bestName": "PONS / WETH 1%",
+        "bestAddress": "0x10cc6bd38112cac182db90b6a71d8bb5939526ba",
+        "bestNetPercent": "366.62",
         "alternatives": 0
       },
       {
         "pair": "pons/usdg",
         "bestName": "PONS / USDG 0.3%",
         "bestAddress": "0x4be9657ec9002e528f4f17a5c43edc525a07f888f7b180c2afbf75e096c4f38a",
-        "bestNetPercent": "-25.03",
+        "bestNetPercent": "236.82",
+        "alternatives": 0
+      },
+      {
+        "pair": "stonkbroker/weth",
+        "bestName": "STONKBROKER / WETH 1%",
+        "bestAddress": "0xd33c8fd38b06e989cdbd4dffdefab71c4bdd415b24964c8d69e38ff35b068f92",
+        "bestNetPercent": "132.43",
+        "alternatives": 0
+      },
+      {
+        "pair": "cashcat/weth",
+        "bestName": "CASHCAT / WETH 0.29%",
+        "bestAddress": "0x1252fbfc4f6530a025ca351494245797b2a147b7b5d2dc8af7893e4e1a2e9df3",
+        "bestNetPercent": "96.26",
+        "alternatives": 2
+      },
+      {
+        "pair": "cashcat/usdg",
+        "bestName": "CASHCAT / USDG 0.269%",
+        "bestAddress": "0xa92a3df27a00a276183ff7265fd8affa11df1fe8bb23ddfaf13f6c879a3f818b",
+        "bestNetPercent": "71.32",
         "alternatives": 0
       }
     ],
@@ -1702,8 +1755,8 @@
   "priceCrossCheck": {
     "poolAddress": "0x52e65B17fB6E5BA00Ed806f37Afcd2DaA50271Ca",
     "onChainPrice": "1918.55",
-    "thirdPartyPrice": "1912.08",
-    "differencePercent": "0.34",
+    "thirdPartyPrice": "1882.68",
+    "differencePercent": "1.91",
     "agrees": true
   }
 }

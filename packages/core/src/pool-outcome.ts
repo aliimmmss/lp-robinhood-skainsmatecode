@@ -72,6 +72,44 @@ export function projectPositionOutcome(input: PositionOutcomeInput): PositionOut
   }
 }
 
+/** Sizing caps borrowed from published LP-automation practice. */
+export const SIZING_LIMITS = Object.freeze({
+  maxPositionShareOfTvlPercent: 1,
+  maxExitImpactPercent: 4,
+})
+
+export type ExitImpact = {
+  positionShareOfTvlPercent: number
+  /** Approximate price impact of unwinding the position, as a percent string. */
+  estimatedExitImpactPercent: string
+  exceedsTvlShareCap: boolean
+  exceedsImpactLimit: boolean
+}
+
+/**
+ * Sizing and exit-liquidity sanity for a position in a pool.
+ *
+ * Exiting an LP position means swapping roughly half its value back through the
+ * pool, so impact is approximated with the constant-product form
+ * `dx / (x + dx)` using half the position against half the reserves. Real
+ * concentrated-liquidity impact depends on where liquidity sits relative to
+ * price, so treat this as an order-of-magnitude check rather than a quote.
+ */
+export function estimateExitImpact(input: { notionalUsd: number; reserveUsd: number }): ExitImpact {
+  if (!(input.notionalUsd > 0)) throw new RangeError('notionalUsd must be positive')
+  if (!(input.reserveUsd > 0)) throw new RangeError('reserveUsd must be positive')
+  const positionShareOfTvlPercent = (input.notionalUsd / input.reserveUsd) * 100
+  const swapSide = input.notionalUsd / 2
+  const reserveSide = input.reserveUsd / 2
+  const impact = (swapSide / (reserveSide + swapSide)) * 100
+  return {
+    positionShareOfTvlPercent,
+    estimatedExitImpactPercent: impact.toFixed(2),
+    exceedsTvlShareCap: positionShareOfTvlPercent > SIZING_LIMITS.maxPositionShareOfTvlPercent,
+    exceedsImpactLimit: impact > SIZING_LIMITS.maxExitImpactPercent,
+  }
+}
+
 /** Order-independent key for a pool pair, so "A / B" and "B / A" group together. */
 export function normalizePairKey(poolName: string): string {
   const withoutFee = poolName.replace(/\s*\d+(?:\.\d+)?%\s*$/, '')
