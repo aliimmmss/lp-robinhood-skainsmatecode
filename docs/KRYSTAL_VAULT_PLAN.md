@@ -22,12 +22,12 @@ Separately, Krystal's pool analytics (`lp_explorer/top_pools`, `pool_detail`) re
 
 | Area | RAPTOR-X | This config | Reason |
 | --- | --- | --- | --- |
-| Divergence loss | absent entirely | handled by pair choice and a conservative fixed range, since the executor cannot model it | Its own top picks measured −39% and −35% divergence loss in two days. Gross fees alone hid that. The whitelist avoids the volatile pairs where it dominates. |
+| Divergence loss | absent entirely | range width scales with measured volatility, and a 24h move cap excludes the worst pairs | Its own top picks measured −39% and −35% divergence loss in two days. Gross fees alone hid that. |
 | Exiting | `negative_pnl_never_authorizes_exit`; positions permanent | exit after 14 days if it has underperformed a plain hold for 7 straight days | Never exiting turns every bad entry into permanent dead capital while the headline APR reflects only the live earners. |
-| Pool age | 1-day-old pools admitted via early ignition | enforced by whitelist, not by a gate | Its top four picks had 1–2 days of history. Krystal cannot supply pool age on this chain, so the whitelist restricts the universe to pools verified as 27–48 days old. |
-| Range | fixed 10% minimum | fixed 10%, justified by our own measurement | Krystal cannot supply the daily-close history needed to derive a width, so we fixed it at the value our analysis showed this pair respected on 100% of the last ten days. |
+| Pool age | 1-day-old pools admitted via early ignition | approximated by high TVL and volume floors, since age is unavailable | Its top four picks had 1–2 days of history. A pool holding $500k with $250k of daily volume is rarely two days old, though this is a proxy rather than a guarantee. |
+| Range | fixed 10% minimum | four bands selected by 24h price change | Our data: volatile pools closed inside ±10% on 11–30% of days, so one fixed width cannot serve both a stable pair and a memecoin. |
 | Absolute fees | $75/day floor | kept | Good idea; we adopted it into our own screen too. |
-| Token safety | full firewall | kept, plus explorer verification | Genuinely strong; nothing to improve. |
+| Token safety | full firewall | **not available in-vault**; audited by us after entry | Krystal cannot check contracts on this chain. This is the one place the config is weaker than RAPTOR-X, and it is compensated by the position-share cap and post-entry review. |
 | Position sizing | ≤1% pool TVL, ≤5% exit liquidity | kept | Sound. |
 
 ## Measured costs on Robinhood Chain
@@ -50,26 +50,39 @@ What Krystal appears to have for Robinhood Chain: **TVL, 24h volume, 24h fees, A
 Two consequences that shape everything below:
 
 1. **A gate over unavailable data does not fail safe, it fails closed and permanently.** The agent will correctly refuse forever rather than guess. Never write such a gate.
-2. **Declaring the facts inside the config does not help.** Custom keys asserting verified age or contract status are normalized away; the agent honours its own schema, not invented fields. Verified facts have to be enforced by *restricting the universe*, which is what the whitelist does.
+2. **Declaring the facts inside the config does not help.** Custom keys asserting verified age or contract status are normalized away; the agent honours its own schema, not invented fields. Nor can the pool whitelist substitute: Krystal's pool database for this chain does not contain the liquid pools our registry verifies, so it cannot be populated with them.
 
-So the safety that age and contract checks were providing moves into the whitelist, and the range that price history was going to derive becomes a fixed band our own analysis already justified. This is a genuine reduction in the config's generality: it is no longer a pool-discovery strategy, it is a constrained operator on three pre-vetted pools. That is the correct trade at this scale, but do not later widen the whitelist without restoring equivalent protection.
+So the protection that age and contract checks were providing has to come from thresholds over data that does exist. Two facts make that workable:
 
-## Starter vault — validation scale
+1. **A volume floor excludes dead and mispriced pools automatically.** Krystal indexes a WETH/USDG pool built on a different USDG contract which trades about $1,078 a day; any volume floor above $25,000 rejects it without needing to know anything about the token.
+2. **24h price change is available and works as a volatility proxy.** That replaces the multi-day history the range system was going to use: a pool that moved under 2% in a day gets a tight band, one that moved 14% gets a wide one.
 
-At this size the vault is a **plumbing test, not an income strategy**. A $9.50 position at the pinned pools' measured rate earns roughly **$0.011/day, about $0.34/month**. The point is to confirm the machinery works: the vault opens a position, it appears in the dashboard's **My positions** panel, and Krystal's `vs holding` figure agrees with our own on-chain analysis. Those questions answer identically at $10 and at $1,000, and at $10 the first mistake costs nothing.
+What is genuinely lost is contract-safety screening. The agent cannot check whether a token is a honeypot or has a transfer tax. That gap is covered from outside the vault: cap any single position at a third of the balance, and audit what it actually entered using our dashboard and the block explorer, rather than trusting it in advance.
 
-Do not judge yield from a vault this small. Dust and rounding distort the percentages more than real performance does.
+## Multi-pool configuration
+
+This config lets the agent choose among any pool that clears the thresholds, rather than a fixed pair. Applied to live data, the thresholds currently admit six pools: four WETH/USDG fee tiers, one tokenized-stock pair (nvda/USDG, which moved 2.3% in 24h), and one large memecoin pool (CASHCAT/WETH, 14.1% and by far the biggest fee generator at about $169,000 a day).
+
+The single dial for how much memecoin exposure you accept is `maximum_price_change_24h_fraction`, and the matching UI field **Max Drawdown (24h)**:
+
+| Value | Effect on the current universe |
+| --- | --- |
+| 0.25 (as written) | admits CASHCAT and everything quieter — six pools |
+| 0.10 | excludes CASHCAT, keeps nvda and all WETH/USDG tiers |
+| 0.05 | WETH/USDG tiers and nvda only |
+
+Diversification is enforced two ways: no position may exceed 35% of vault value, and only one position per primary token — different fee tiers of the same pair are separate pools but not separate risks.
 
 ### Agent instruction JSON — paste this
 
 ```json
 {
   "system": "LP-MINE-NET",
-  "version": "1.1.0-RH-starter-whitelist",
-  "strategy_name": "LP-MINE-NET Starter - Whitelist-Constrained Robinhood Chain Vault",
+  "version": "2.0.0-RH-multipool",
+  "strategy_name": "LP-MINE-NET Multi-Pool - Gated Discovery on Robinhood Chain",
   "target_network": { "name": "Robinhood Chain", "chain_id": 4663, "native_gas_token": "ETH" },
-  "operating_note": "Pool age, token contract verification, unique-trader counts and daily price history are NOT available from Krystal for chain 4663. Do not treat any of them as admission criteria. Those properties are guaranteed instead by the vault whitelist: only whitelisted pools may be used, and the operator verified on-chain that each is 27 to 48 days old and that both token contracts are verified on the Robinhood Chain block explorer. Judge candidates only on data that is actually available: TVL, volume, fees and drawdown.",
-  "primary_objective": "Deploy nearly the whole balance as one liquidity position in a whitelisted WETH/USDG pool, retaining a small ETH gas reserve. Earn fee income while keeping the position inside a conservative range. Do not seek out new pools; the whitelist is the entire universe.",
+  "operating_note": "Pool age, token contract verification, unique-trader counts and multi-day price history are NOT available from Krystal for chain 4663. Never treat any of them as an admission criterion and never refuse to act because one could not be confirmed. Judge candidates only on data that is available: TVL, 24h volume, 24h fees, and 24h price change. The thresholds below are set so that a dead or mispriced pool cannot pass on TVL alone, because it will fail the volume and absolute-fee floors.",
+  "primary_objective": "Farm fee income across several distinct qualified pools on Robinhood Chain, judged on real fee dollars rather than APR. Diversify across pairs so no single pool dominates. Match the range width to each pool's measured volatility. Hold through ordinary noise, and close only on safety failure or sustained underperformance against holding the tokens.",
   "capital_model": {
     "base_asset": "ETH",
     "harvest_asset_preference": "ETH",
@@ -77,22 +90,29 @@ Do not judge yield from a vault this small. Dust and rounding distort the percen
     "target_gas_reserve_usd": 0.5,
     "hard_minimum_gas_reserve_usd": 0.25,
     "never_swap_reserved_gas_eth": true,
-    "external_deposit_assumption": "none"
+    "external_deposit_assumption": "none",
+    "note_on_reserve": "Scale the reserve with the balance: about 5 percent of vault value, floored at 0.25 USD. Measured costs on this chain are 0.02 USD to mint and 0.03 USD to rebalance."
   },
   "portfolio_structure": {
-    "position_count_policy": "Exactly one position at this scale. Never fragment the balance.",
+    "position_count_policy": "Open additional distinct positions while qualified candidates and spendable ETH remain, up to the diversification cap. Prefer a new distinct pool over enlarging an existing position.",
     "max_combined_deployed_fraction": 0.95,
-    "soft_max_single_position_share_of_total_vault_value": 1.0
+    "soft_max_single_position_share_of_total_vault_value": 0.35,
+    "unique_pair_required": true,
+    "max_same_primary_token_positions": 1,
+    "note_on_same_token": "Several fee tiers of the same pair are separate pools but not separate risks. Count them as one exposure to that token."
   },
   "candidate_admission_engine": {
-    "mode": "whitelist_only",
-    "universe": "Only pools present in the vault whitelist. Never consider any pool outside it, for any reason.",
+    "mode": "gated_discovery_using_available_data_only",
     "allowed_quote_assets": ["ETH", "WETH", "USDG"],
-    "entry_thresholds_using_available_data_only": {
-      "minimum_pool_tvl_usd": 25000,
-      "minimum_pool_volume_24h_usd": 25000,
-      "minimum_absolute_pool_fees_24h_usd": 75,
-      "maximum_token_drawdown_24h": 0.35
+    "require_at_least_one_allowed_quote_asset": true,
+    "blocked_pair_categories": ["stablecoin_to_stablecoin", "staked_ETH_to_ETH", "two_unrelated_non_quote_tokens"],
+    "entry_thresholds": {
+      "minimum_pool_tvl_usd": 500000,
+      "minimum_pool_volume_24h_usd": 250000,
+      "minimum_absolute_pool_fees_24h_usd": 500,
+      "minimum_fees_per_tvl_24h": 0.0005,
+      "minimum_volume_per_tvl_24h": 0.2,
+      "maximum_price_change_24h_fraction": 0.25
     },
     "do_not_require": [
       "pool_age",
@@ -101,22 +121,43 @@ Do not judge yield from a vault this small. Dust and rounding distort the percen
       "multi_day_price_history",
       "seven_day_or_thirty_day_metrics"
     ],
-    "if_a_metric_is_unavailable": "Treat it as not applicable rather than as a failed check, because the whitelist already constrains the universe to operator-verified pools. Never refuse to act solely because an unavailable metric could not be confirmed."
+    "if_a_metric_is_unavailable": "Treat it as not applicable rather than as a failed check. Never refuse to act solely because an unavailable metric could not be confirmed.",
+    "rank_candidates_by": [
+      "absolute_fees_24h",
+      "fees_per_tvl_24h",
+      "pool_tvl_usd",
+      "lower_price_change_24h"
+    ],
+    "reject_if_any_true": [
+      "volume_is_high_but_absolute_fees_are_below_the_floor",
+      "tvl_is_high_but_volume_is_below_the_floor",
+      "pool_metrics_are_missing_zero_or_self_inconsistent",
+      "the_pool_is_already_represented_by_another_position_on_the_same_primary_token"
+    ]
   },
   "position_sizing": {
-    "mode": "deploy_available_balance_as_one_position",
-    "default_new_position_value_usd": 9.5,
-    "minimum_new_position_value_usd": 5,
+    "mode": "fixed_unit_entry_scaled_to_balance",
+    "default_new_position_value_usd": 200,
+    "minimum_new_position_value_usd": 25,
     "entry_funding_asset": "ETH",
-    "additional_caps": { "position_must_not_exceed_fraction_of_pool_tvl": 0.01 }
+    "additional_caps": {
+      "position_must_not_exceed_fraction_of_pool_tvl": 0.01,
+      "position_must_not_exceed_soft_single_position_share": 0.35
+    },
+    "note_on_sizing": "Set default_new_position_value_usd to roughly one third of vault value so three to four positions fit inside the diversification cap. Never below 25 USD, because a smaller position makes rebalancing and dust a material share of returns."
   },
   "range_system": {
-    "mode": "fixed_conservative_band",
+    "mode": "volatility_banded_from_available_data",
     "reference": "current_price",
-    "lower_fraction": 0.1,
-    "upper_fraction": 0.1,
-    "rationale": "The operator measured this pair keeping its daily closes inside a 10 percent band on 100 percent of the last ten days, so a fixed band is used instead of deriving one from price history the executor cannot access.",
+    "principle": "Multi-day price history is unavailable, so derive the band from 24h price change, which is available. A quiet pair gets a tight band that earns more per dollar; a volatile pair gets a wide band so the position stays in range instead of accruing divergence loss while earning nothing.",
+    "bands_by_absolute_price_change_24h": [
+      { "if_change_below_fraction": 0.02, "lower_fraction": 0.1, "upper_fraction": 0.1 },
+      { "if_change_below_fraction": 0.05, "lower_fraction": 0.15, "upper_fraction": 0.15 },
+      { "if_change_below_fraction": 0.15, "lower_fraction": 0.25, "upper_fraction": 0.25 },
+      { "otherwise": true, "lower_fraction": 0.35, "upper_fraction": 0.35 }
+    ],
     "guardrails": {
+      "minimum_total_range_fraction": 0.08,
       "adjust_existing_positions": true,
       "same_pool_only": true,
       "minimum_minutes_between_adjustments_per_position": 1440,
@@ -133,13 +174,15 @@ Do not judge yield from a vault this small. Dust and rounding distort the percen
     "emergency_exit_if_any_true": [
       "pool_or_token_contract_integrity_failure",
       "sell_or_liquidity_exit_route_becomes_materially_impaired",
-      "pool_depeg_or_exploit_evidence_exists"
+      "pool_depeg_or_exploit_evidence_exists",
+      "pool_volume_24h_collapses_below_one_tenth_of_the_entry_floor"
     ],
     "performance_exit": {
       "enabled": true,
       "minimum_position_age_days": 14,
       "exit_if_all_true": [
         "position_has_underperformed_holding_its_two_tokens_for_at_least_7_consecutive_days",
+        "pool_no_longer_meets_entry_thresholds",
         "projected_fee_income_over_the_next_7_days_cannot_recover_the_shortfall"
       ]
     },
@@ -147,6 +190,7 @@ Do not judge yield from a vault this small. Dust and rounding distort the percen
       "negative_unrealized_pnl",
       "temporarily_out_of_range",
       "apr_cooled_during_one_snapshot",
+      "another_pool_has_a_higher_rank",
       "harvest_or_rate_lookup_failed"
     ]
   },
@@ -154,15 +198,22 @@ Do not judge yield from a vault this small. Dust and rounding distort the percen
     "enabled": true,
     "harvest_asset": "ETH",
     "compound_enabled": false,
-    "harvest_threshold_usd": 0.1,
+    "harvest_threshold_usd": 2.0,
     "harvest_is_non_blocking_best_effort": true,
-    "realized_eth_use_order": ["restore the gas reserve", "remain idle; do not open a second position"],
+    "realized_eth_use_order": [
+      "restore the gas reserve",
+      "accumulate until spendable ETH reaches one position unit",
+      "fund another distinct qualified pool",
+      "remain idle when no qualified use exists"
+    ],
     "on_harvest_failure": { "keep_position_unchanged": true, "do_not_close": true, "retry_on_later_scan": true }
   },
   "execution_failure_firewall": {
     "enabled": true,
+    "abort_remaining_actions_for_position_after_any_failure": true,
     "do_not_translate_failed_harvest_into_close_adjust_or_swap": true,
     "do_not_translate_failed_rate_lookup_into_position_exit": true,
+    "do_not_translate_failed_open_into_an_unrelated_fallback_open": true,
     "preferred_response": "hold_position_and_idle_ETH_then_retry_on_a_later_scan"
   },
   "post_action_verification": {
@@ -172,30 +223,44 @@ Do not judge yield from a vault this small. Dust and rounding distort the percen
       "nonzero_liquidity",
       "correct_token_pair",
       "correct_chain_id",
+      "range_matches_authorized_band",
       "ETH_gas_reserve_remains_above_hard_minimum"
+    ],
+    "after_range_adjustment_require": [
+      "transaction_success",
+      "same_pool_and_pair_as_incumbent",
+      "nonzero_liquidity",
+      "no_proceeds_were_redirected_to_another_pool"
     ],
     "if_verification_fails": "stop_all_chained_actions_and_report_the_exact_failure"
   },
   "telemetry_and_debug": {
     "enabled": true,
+    "report_top_candidates_considered": 5,
+    "report_candidate_pool_address_and_token_addresses": true,
+    "report_pool_level_metrics_not_token_level_metrics": true,
     "report_admission_pass_fail_and_reason": true,
     "report_which_metrics_were_unavailable": true,
-    "report_chosen_range_and_current_price": true,
+    "report_chosen_band_and_the_price_change_that_selected_it": true,
+    "report_position_vs_holding_comparison_per_position": true,
     "report_gas_reserve_before_and_after_projected_action": true,
     "report_post_action_verification": true
   },
   "forbidden_behaviors": [
-    "do_not_consider_any_pool_outside_the_whitelist",
     "do_not_refuse_to_act_because_pool_age_trader_counts_or_contract_verification_data_is_unavailable",
     "do_not_enter_on_apr_alone",
+    "do_not_use_token_market_cap_as_pool_liquidity",
+    "do_not_use_aggregate_token_volume_as_candidate_pool_volume",
+    "do_not_hold_more_than_one_position_on_the_same_primary_token",
+    "do_not_exceed_the_single_position_share_cap",
     "do_not_compound_harvests",
     "do_not_spend_reserved_gas_ETH",
-    "do_not_open_more_than_one_position",
+    "do_not_use_principal_from_an_existing_position_to_fund_a_new_one",
     "do_not_rebalance_into_a_sustained_directional_trend",
     "do_not_close_for_temporary_out_of_range_status_or_a_single_cooling_snapshot",
     "do_not_convert_execution_failure_into_churn"
   ],
-  "final_instruction": "Operate only within the vault whitelist, which contains operator-verified WETH/USDG pools on Robinhood Chain. Pool age, token contract verification, unique-trader counts and multi-day price history are unavailable from Krystal on this chain: treat them as not applicable, never as failed checks, and never refuse to act because they could not be confirmed. Judge the whitelisted pool only on TVL, 24h volume, 24h fees and 24h drawdown. Deploy up to 95 percent of the balance as a single position, keeping about 0.50 USD of ETH for gas and never less than 0.25 USD. Use a fixed range of 10 percent below and 10 percent above the current price. Never exceed 1 percent of pool TVL. Harvest to ETH at 0.10 USD and never compound. Do not open a second position. Hold through ordinary drawdown, temporary out-of-range states and single-snapshot APR cooling. Adjust range in the same pool at most once per day, only when the condition persists across two scans and projected fee recovery exceeds execution cost, and never into a sustained trend. Close only on contract integrity failure, exploit, depeg, materially impaired exit routes, or when a position at least 14 days old has underperformed holding its two tokens for seven consecutive days. If any lookup or execution step fails, isolate the failure and hold."
+  "final_instruction": "Operate as a multi-pool net-truth fee farmer on Robinhood Chain. Pool age, token contract verification, unique-trader counts and multi-day price history are unavailable on this chain: treat them as not applicable, never as failed checks, and never refuse to act because they could not be confirmed. Judge each candidate only on TVL, 24h volume, 24h fees and 24h price change. Admit a pool only when it holds at least 500000 USD of TVL, traded at least 250000 USD in 24h, generated at least 500 USD of fees in 24h, and moved no more than 25 percent in 24h, and when it pairs one distinct token against ETH, WETH or USDG. Rank admitted pools by absolute 24h fees first. Hold at most one position per primary token, counting different fee tiers of the same pair as one exposure, and never let a single position exceed 35 percent of vault value or 1 percent of pool TVL. Choose the range band from the pool's 24h price change: 10 percent each side below 2 percent movement, 15 percent below 5 percent movement, 25 percent below 15 percent movement, otherwise 35 percent. Harvest to ETH at 2 USD and never compound; use realized ETH to fund another distinct qualified pool rather than enlarging an existing position. Hold through ordinary drawdown, temporary out-of-range states and single-snapshot APR cooling. Adjust range in the same pool at most once per day, only when the condition persists across two scans and projected fee recovery exceeds execution cost, and never into a sustained trend. Exit on contract integrity failure, exploit, depeg, materially impaired exit routes, a collapse of pool volume to under a tenth of the entry floor, or when a position at least 14 days old has underperformed holding its two tokens for seven consecutive days while no longer meeting entry thresholds. If any lookup or execution step fails, isolate the failure and hold."
 }
 ```
 
@@ -207,20 +272,20 @@ Do not judge yield from a vault this small. Dust and rounding distort the percen
 | Preferences | Expected Return | **Steady Yield** |
 | Preferences | Farming Style | **Smart** |
 | Scopes | Min. Range | **10%** |
-| Scopes | Min. TVL | **$25,000** |
-| Scopes | Whitelisted Pools | see note below |
-| Scopes | Max Drawdown (24h) | **-35** |
+| Scopes | Min. TVL | **$500,000** |
+| Scopes | Whitelisted Pools | **leave empty** — the thresholds are the filter now |
+| Scopes | Max Drawdown (24h) | **-25** (lower it to -10 to exclude memecoins) |
 | Scopes | Prioritize By | **Fee (7d)** |
 | Scopes | Min. APR | **all four left 0** |
-| Scopes | Min. Volume | 1h **0** · 24h **25000** · 7d **0** · 30d **0** |
-| Scopes | Min. Fee | 1h **0** · 24h **75** · 7d **0** · 30d **0** |
+| Scopes | Min. Volume | 1h **0** · 24h **250000** · 7d **0** · 30d **0** |
+| Scopes | Min. Fee | 1h **0** · 24h **500** · 7d **0** · 30d **0** |
 
-The 7d and 30d columns must be **0**, not the earlier values. They were chosen to force a history requirement, which is exactly the data Krystal lacks here — leaving them set reintroduces the same permanent refusal through the interface instead of the JSON. Min APR goes to 0 for the same reason: with the universe restricted to three verified pools, an APR floor adds nothing the fee and volume floors do not already cover, and risks blocking on a metric Krystal may not compute for this chain.
+The 7d and 30d columns must be **0**, not the earlier values. They were chosen to force a history requirement, which is exactly the data Krystal lacks here — leaving them set reintroduces the same permanent refusal through the interface instead of the JSON. Min APR goes to 0 for the same reason: the fee and volume floors already express the same requirement in absolute dollars, which is the more honest measure, and an APR floor risks blocking on a metric Krystal may not compute for this chain.
 | Execution | Max. Swap Slippage | **0.5%** |
 | Execution | Max. Liquidity Slippage | **0.5%** |
 | Execution | Max. Withdraw Slippage | **0.5%** |
 | Execution | Cool-down Period | **1 hour** |
-| Execution | Max. Value Per Strategy | **100%** |
+| Execution | Max. Value Per Strategy | **35%** (or 100% while the balance only supports one position) |
 | Execution | Gas Fee Ceiling | **$** mode, **0.15** |
 | Execution | Strict Cap | **On** |
 | Execution | Default Asset | **ETH** |
@@ -237,7 +302,9 @@ Reasoning for the less obvious ones:
 - **30d stays 0** because Robinhood Chain is only about two months old; requiring 30-day figures would exclude nearly everything, including sound pools.
 - **Prioritize By Fee (7d)** ranks by absolute fee dollars over a window long enough to exclude spikes. Avoid every APR option: APR is nomination, not proof. Avoid Volume, since our own gate rejects high volume with negligible fees. Avoid TVL, which is the blue-chip drift trap. `Drawdown (most stable)` is a defensible alternative that optimizes the divergence-loss side instead of the fee side.
 
-**Whitelisted Pools** is the highest-leverage field here. Left empty, the agent picks from every pool on the chain and the numeric gates are your only protection. Filled with the four on-chain-verified WETH/USDG pools from our registry, your analysis replaces its pool selection entirely: modest measured yield, 100% in-range, addresses we verify fail-closed. For a first vault the whitelist is the conservative option. You can widen it later; you cannot un-lose capital.
+**Whitelisted Pools** deserves a note, because it looks like the safest lever and is not usable here. Krystal's pool database for chain 4663 does not contain the liquid pools our registry verifies: searching it surfaces a WETH/USDG pool built on a *different* USDG contract (`0x2ce3e396…`, 18 decimals, unverified) whose pool trades about $1,078 a day, against $149,000,000 a day in the pool our registry pins. So the whitelist cannot be populated with the pools you would actually want.
+
+That is why this config leaves it empty and relies on thresholds instead. The volume floor does the same job from the other direction: it rejects that dead pool automatically, without needing to know anything about which USDG is canonical.
 
 ## Scaling up later
 
