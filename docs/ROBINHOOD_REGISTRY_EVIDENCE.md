@@ -6,6 +6,26 @@ The Robinhood Uniswap v3 registry is **read-only verified** as of `2026-07-21T09
 
 It is **not execution-eligible**. This evidence supports indexing, monitoring, and fail-closed read verification only. It does not authorize wallet connections, token approvals, calldata construction, signing, transaction submission, or capital deployment.
 
+## Token-identity warning: two contracts named USDG
+
+Verified 2026-07-29. **Robinhood Chain carries at least two distinct ERC-20 contracts that both report the name "Global Dollar" and the symbol `USDG`.** Both have real Uniswap v3 pools created by the pinned official factory, so factory provenance alone does not distinguish them.
+
+| | Pinned in this registry | Second contract |
+| --- | --- | --- |
+| Address | `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168` | `0x2ce3e396e069ac9fa62046f423267072e06e77af` |
+| Decimals | **6** | 18 |
+| Total supply | 312,581,324 | exactly 1,000,000,000 |
+| Contract verified on explorer | **yes** | **no** |
+| Holders | 39,473 | 76,694 |
+| WETH pool at 0.01% | `0x52e65B17…50271Ca` | `0xd84605cc215a31e4fea4f43df4d01138b3a5c6d4` |
+| That pool's 24h volume | **~$149,000,000** | ~$1,078 |
+
+Both pools are canonical results of `factory.getPool()`. The distinguishing evidence is decimals (6 matches the USDG convention used elsewhere), explorer verification, and above all trading volume: essentially all real WETH/USDG activity occurs in the pool built on the pinned contract, while the other is economically inert.
+
+This is the concrete case the `never_identify_token_by_symbol_alone` rule exists for. Any tool that resolves USDG by symbol, or that trusts a third-party index without checking the contract address, can silently select the wrong pool. Krystal's own pool database for chain 4663 surfaces the second one, which is why its vault product cannot reach the liquid market on this chain.
+
+Not settled: which contract is the officially sanctioned Global Dollar. Holder count favours the second; decimals, verification, and liquidity favour the pinned one. For liquidity-provision purposes the volume difference is decisive regardless, but if an authoritative publication of the canonical address is found and contradicts this registry, treat that as a fail-closed event and re-verify before acting.
+
 ## Verification record
 
 GitHub Actions run `29816884050` compared two independently configured RPC paths:
